@@ -18,8 +18,8 @@ CXXFLAGS := -m64 -std=c++20 -Weffc++ $(CFLAGS)
 all: intervalTest
 
 # make intervalTest
-intervalTestObjs := $(OBJ)/intervalTest.o $(OBJ)/Intervals.o $(OBJ)/Events.o
-intervalTestDeps := $(INC)/Intervals.h $(INC)/Events.h
+intervalTestObjs := $(OBJ)/intervalTest.o $(OBJ)/Interval.o $(OBJ)/Event.o $(OBJ)/EventScheduler.o
+intervalTestDeps := $(INC)/Interval.h $(INC)/Event.h $(INC)/EventScheduler.h
 
 intervalTest: $(EXE)/intervalTest
 	LD_LIBRARY_PATH=$(LD_PATH) ./$(EXE)/intervalTest

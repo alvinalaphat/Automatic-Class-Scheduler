@@ -1,7 +1,7 @@
 #ifndef EVENTS_H
 #define EVENTS_H
 
-#include "Intervals.h"
+#include "Interval.h"
 
 class Event {
 	private:

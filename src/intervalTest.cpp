@@ -1,6 +1,6 @@
 
 #include <iostream>
-#include "Intervals.h"
+#include "Interval.h"
 
 int main() {
 	

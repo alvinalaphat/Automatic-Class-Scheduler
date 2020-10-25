@@ -1,5 +1,5 @@
 
-#include "Intervals.h"
+#include "Interval.h"
 #include <algorithm>
 
 IntervalGroup::IntervalGroup() : intervals() {}
