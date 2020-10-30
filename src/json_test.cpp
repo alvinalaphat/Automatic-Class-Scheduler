@@ -3,12 +3,16 @@
 #include <iostream>
 #include <json.hpp>
 #include <string>
+#include <utility>
+#include <vector>
 
 using nlohmann::json;
 using std::cout;
 using std::endl;
+using std::pair;
 using std::setw;
 using std::string;
+using std::vector;
 
 int main() {
   // Read json file.
@@ -38,6 +42,29 @@ int main() {
   cout << "currency: " << currency << " (expected: USD)" << endl;
   cout << "currency + A: " << (currency + "A") << " (expected: USDA)" << endl;
   cout << "-----------------------------" << endl;
-  
+
+  // Parse vector of integers.
+  cout << "vector parsing - check manually" << endl;
+  cout << "-----------------------------" << endl;
+  vector<int> vec = example["list"].get<vector<int>>();
+  cout << "list: ";
+  for (int& num : vec) {
+    cout << num << " ";
+  }
+  cout << "(expected: 1 0 2)" << endl;
+  cout << "-----------------------------" << endl;
+
+  // Parse vector of pairs.
+  cout << "vector of pairs parsing - check manually" << endl;
+  cout << "-----------------------------" << endl;
+  vector<pair<int, int>> pairs =
+      example["pairs"].get <vector<pair<int, int>>>();
+  cout << "pairs: ";
+  for (pair<int, int>& p : pairs) {
+    cout << "[" << p.first << ", " << p.second << "] ";
+  }
+  cout << "(expected: [1, 2] [3, 4] [5, 6])" << endl;
+  cout << "-----------------------------" << endl;
+
   return EXIT_SUCCESS;
 }
