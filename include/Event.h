@@ -2,6 +2,7 @@
 #define EVENTS_H
 
 #include "Interval.h"
+#include <iostream>
 
 class Event {
 	private:
@@ -13,7 +14,9 @@ class Event {
 		Event(const std::vector<IntervalGroup>& secs);
 		
 		std::size_t size() const;
-		IntervalGroup getSection(std::size_t index);
+		IntervalGroup getSection(std::size_t index) const;
+
+		void display(std::ostream& os, const char * lineStart = "") const;
 };
 
 #endif

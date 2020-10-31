@@ -7,27 +7,38 @@ OBJ := obj
 EXE := exe
 
 # using g++ 10.2 compiler
-PP := /escnfs/home/jabbott4/public/gcc/bin/g++
-LD_PATH := /escnfs/home/jabbott4/public/gcc/lib64
+PP := g++
 
 # Compiler flags for production quality code
 CFLAGS := -O0 -g -Wall -Wextra -Wconversion -Wshadow -pedantic -Werror -I$(INC)
-CXXFLAGS := -m64 -std=c++20 -Weffc++ $(CFLAGS)
+CXXFLAGS := -m64 -std=c++17 -Weffc++ $(CFLAGS)
 
 # make all
-all: intervalTest
+all: intervalTest EventSchedulerTest
+
+# general include dependencies
+DEPS := $(INC)/Interval.h $(INC)/Event.h $(INC)/EventScheduler.h
 
 # make intervalTest
-intervalTestObjs := $(OBJ)/intervalTest.o $(OBJ)/Interval.o $(OBJ)/Event.o $(OBJ)/EventScheduler.o
-intervalTestDeps := $(INC)/Interval.h $(INC)/Event.h $(INC)/EventScheduler.h
+intervalTestObjs := $(OBJ)/intervalTest.o $(OBJ)/Interval.o
 
 intervalTest: $(EXE)/intervalTest
-	LD_LIBRARY_PATH=$(LD_PATH) ./$(EXE)/intervalTest
+	./$<
 
 $(EXE)/intervalTest: $(intervalTestObjs)
 	$(PP) $^ -o $@ $(CXXFLAGS)
 
-$(OBJ)/%.o: $(SRC)/%.cpp $(intervalTestDeps)
+# make EventSchedulerTest
+EventSchedulerTestObjs := $(OBJ)/EventSchedulerTest.o $(OBJ)/Interval.o $(OBJ)/Event.o $(OBJ)/EventScheduler.o
+
+EventSchedulerTest: $(EXE)/EventSchedulerTest
+	./$<
+
+$(EXE)/EventSchedulerTest: $(EventSchedulerTestObjs)
+	$(PP) $^ -o $@ $(CXXFLAGS)
+
+# general rule for making all object files
+$(OBJ)/%.o: $(SRC)/%.cpp $(DEPS)
 	$(PP) -c -o $@ $< $(CXXFLAGS)
 
 # make initialize

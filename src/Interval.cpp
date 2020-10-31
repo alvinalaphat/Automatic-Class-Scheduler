@@ -44,3 +44,16 @@ bool IntervalGroup::intersects(const IntervalGroup& igroup) const {
 	return false;
 }
 
+std::ostream& operator<<(std::ostream& os, const IntervalGroup& igroup) {
+	for (size_t i = 0; i < igroup.intervals.size(); ++i) {
+		os << "[" << igroup.intervals[i].first << ", " <<
+			igroup.intervals[i].second << "]";
+		
+		if (i != igroup.intervals.size() - 1) {
+			os << ", ";
+		}
+	}
+
+	return os;
+}
+

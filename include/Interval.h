@@ -3,6 +3,7 @@
 #define INTERVALS_H
 
 #include <vector>
+#include <iostream>
 
 class IntervalGroup {
 	private:
@@ -14,6 +15,9 @@ class IntervalGroup {
 		IntervalGroup(const std::vector<std::pair<double, double>>& intervals);
 
 		bool intersects(const IntervalGroup& igroup) const;
+
+		friend std::ostream& operator<<(std::ostream& os,
+			const IntervalGroup& igroup);
 
 };
 
