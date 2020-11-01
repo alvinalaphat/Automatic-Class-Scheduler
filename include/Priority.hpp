@@ -3,32 +3,31 @@
 
 #include <iostream> // std::cout
 
-// This class encapsulates two values, mValue and mPriority, and compares to other Priorities by mPriority.
+// This class encapsulates two values, value_ and priority_, and compares to other Priorities by priority_.
 template <class T>
 class Priority {
 
-    // Preceded member variables with `m` so that we can use methods with i.e. `value`, `priority`.
-    T mValue;
-    unsigned int mPriority;
+    T value_;
+    unsigned int priority_;
 
 public:
     // Default constructor and another constructor.
     Priority()
-        : mValue()
-        , mPriority(0)
+        : value_()
+        , priority_(0)
     {
     }
 
     Priority(T inValue, uint inPriority)
-        : mValue(inValue)
-        , mPriority(inPriority)
+        : value_(inValue)
+        , priority_(inPriority)
     {
     }
 
     // Copy constructor.
     Priority(const Priority<T>& other)
-        : mValue(other.mValue)
-        , mPriority(other.mPriority)
+        : value_(other.value_)
+        , priority_(other.priority_)
     {
     }
 
@@ -40,8 +39,8 @@ public:
     {
         // Don't try to assign this to itself.
         if (this != &assign) {
-            this->mValue = assign.mValue;
-            this->mPriority = assign.mPriority;
+            this->value_ = assign.value_;
+            this->priority_ = assign.priority_;
         }
         return *this;
     }
@@ -49,20 +48,20 @@ public:
     // Overload ostream operator so we can print out this object.
     friend std::ostream& operator<<(std::ostream& os, const Priority<T>& other)
     {
-        os << "{v=" << other.mValue << ", p=" << other.mPriority << "}";
+        os << "{v=" << other.value_ << ", p=" << other.priority_ << "}";
         return os;
     }
 
     // Getter methods, remember how we preceded variable names with `m` for member.
-    T value() { return mValue; }
-    unsigned int priority() { return mPriority; }
+    T value() { return value_; }
+    unsigned int priority() { return priority_; }
 
     // Overload comparison operators to compare by priority, not value.
-    bool operator>(const Priority<T>& other) const { return this->mPriority > other.mPriority; }
-    bool operator>=(const Priority<T>& other) const { return this->mPriority >= other.mPriority; }
-    bool operator<(const Priority<T>& other) const { return this->mPriority < other.mPriority; }
-    bool operator<=(const Priority<T>& other) const { return this->mPriority <= other.mPriority; }
-    bool operator==(const Priority<T>& other) const { return this->mPriority == other.mPriority; }
+    bool operator>(const Priority<T>& other) const { return this->priority_ > other.priority_; }
+    bool operator>=(const Priority<T>& other) const { return this->priority_ >= other.priority_; }
+    bool operator<(const Priority<T>& other) const { return this->priority_ < other.priority_; }
+    bool operator<=(const Priority<T>& other) const { return this->priority_ <= other.priority_; }
+    bool operator==(const Priority<T>& other) const { return this->priority_ == other.priority_; }
 };
 
 #endif
