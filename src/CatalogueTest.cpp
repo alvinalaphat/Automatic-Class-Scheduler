@@ -3,7 +3,7 @@
 
 int main() {
   Catalogue cat;
-  cat.fromJson("data/example_courses_1.json");
+  cat.fromJson("data/example_courses_1_OLD.json");
 
   std::cout << cat.size() << " events loaded." << std::endl;
 
