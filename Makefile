@@ -11,7 +11,7 @@ PP := g++
 
 # Compiler flags for production quality code
 CFLAGS := -O0 -g -Wall -Wextra -Wconversion -Wshadow -pedantic -Werror -I$(INC)
-CXXFLAGS := -m64 -std=c++17 -Weffc++ $(CFLAGS)
+CXXFLAGS := -m64 -std=c++2a -Weffc++ $(CFLAGS)
 
 # make all
 all: intervalTest EventSchedulerTest
@@ -49,4 +49,4 @@ initialize:
 clean:
 	rm -rf $(OBJ)/* $(EXE)/*
 
-.PHONY: all intervalTest
+.PHONY: all intervalTest EventSchedulerTest initialize clean
