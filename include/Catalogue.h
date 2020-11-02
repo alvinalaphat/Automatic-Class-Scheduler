@@ -1,7 +1,7 @@
 #ifndef CATALOGUE_HPP
 #define CATALOGUE_HPP
 
-#include "json.hpp"
+#include "json.h"
 #include <algorithm>
 #include <fstream>
 #include <iostream>

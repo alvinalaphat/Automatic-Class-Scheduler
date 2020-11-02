@@ -1,4 +1,4 @@
-#include <Catalogue.hpp>
+#include <Catalogue.h>
 #include <iostream>
 
 int main() {

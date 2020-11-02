@@ -17,7 +17,7 @@ all: jsonTest CatalogueTest intervalTest EventSchedulerTest
 # make JSONTest
 jsonTestObjs := $(OBJ)/jsonTest.o
 
-jsonTestDeps := $(INC)/json.hpp
+jsonTestDeps := $(INC)/json.h
 
 jsonTest: $(EXE)/jsonTest
 	$(EXE)/./jsonTest
@@ -31,7 +31,7 @@ $(OBJ)/%.o: $(SRC)/%.cpp $(jsonTestDeps)
 # make CatalogueTest
 CatalogueTestObjs := $(OBJ)/CatalogueTest.o
 
-CatalogueTestDeps := $(INC)/Priority.hpp $(INC)/PriorityQueue.hpp
+CatalogueTestDeps := $(INC)/Catalogue.h
 
 CatalogueTest: $(EXE)/CatalogueTest
 	$(EXE)/./CatalogueTest
