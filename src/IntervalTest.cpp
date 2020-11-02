@@ -4,6 +4,8 @@
 
 int main() {
 	
+	// Check two interval groups that do not overlap, test the output functions
+	// and the intersect function
 	IntervalGroup i1({{1, 2}, {3, 4.5}, {7, 9}});
 	IntervalGroup i2({{-2, 0}, {4.5, 6}});
 	std::cout << "Interval1: " << i1 << std::endl;
@@ -11,6 +13,8 @@ int main() {
 	std::cout << "Conflict? " << (i1.intersects(i2) ? "Yes" : "No")
 		<< std::endl << std::endl;
 
+	// Check two interval groups that do overlap, test the output functions
+	// and the intersect function
 	IntervalGroup i3({{1, 2}, {3, 5}, {7, 9}});
 	IntervalGroup i4({{-2, 0}, {4.5, 6}});
 	std::cout << "Interval1: " << i3 << std::endl;

@@ -2,11 +2,15 @@
 #include "Interval.h"
 #include <algorithm>
 
+// IntervalGroup constructor for an empty
 IntervalGroup::IntervalGroup() : intervals() {}
 
+// IntervalGroup constructor from a vector of times pairs
 IntervalGroup::IntervalGroup(const std::vector<std::pair<double, double>>& ints) :
 	intervals(ints) {}
 
+// intersects
+// return whether an interval group intersects with another interval group
 bool IntervalGroup::intersects(const IntervalGroup& igroup) const {
 	if (igroup.intervals.size() == 0 || this -> intervals.size() == 0) {
 		return false;
@@ -44,6 +48,7 @@ bool IntervalGroup::intersects(const IntervalGroup& igroup) const {
 	return false;
 }
 
+// friend ostream output operator
 std::ostream& operator<<(std::ostream& os, const IntervalGroup& igroup) {
 	for (size_t i = 0; i < igroup.intervals.size(); ++i) {
 		os << "[" << igroup.intervals[i].first << ", " <<

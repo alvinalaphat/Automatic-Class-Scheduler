@@ -12,7 +12,7 @@ CFLAGS := -O0 -g -Wall -Wextra -Wconversion -Wshadow -pedantic -Werror -I$(INC)
 CXXFLAGS := -m64 -std=c++2a -Weffc++ $(CFLAGS)
 
 # make all
-all: jsonTest CatalogueTest intervalTest EventSchedulerTest
+all: jsonTest CatalogueTest IntervalTest EventSchedulerTest
 
 # make JSONTest
 jsonTestObjs := $(OBJ)/jsonTest.o
@@ -45,13 +45,13 @@ $(OBJ)/%.o: $(SRC)/%.cpp $(CatalogueTestDeps)
 # general include dependencies
 DEPS := $(INC)/Interval.h $(INC)/Event.h $(INC)/EventScheduler.h
 
-# make intervalTest
-intervalTestObjs := $(OBJ)/intervalTest.o $(OBJ)/Interval.o
+# make IntervalTest
+IntervalTestObjs := $(OBJ)/IntervalTest.o $(OBJ)/Interval.o
 
-intervalTest: $(EXE)/intervalTest
+IntervalTest: $(EXE)/IntervalTest
 	./$<
 
-$(EXE)/intervalTest: $(intervalTestObjs)
+$(EXE)/IntervalTest: $(IntervalTestObjs)
 	$(PP) $^ -o $@ $(CXXFLAGS)
 
 # make EventSchedulerTest
@@ -75,4 +75,4 @@ initialize:
 clean:
 	rm -rf $(OBJ)/* $(EXE)/*
 
-.PHONY: all intervalTest EventSchedulerTest initialize clean
+.PHONY: all IntervalTest EventSchedulerTest initialize clean

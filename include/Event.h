@@ -1,5 +1,5 @@
-#ifndef EVENTS_H
-#define EVENTS_H
+#ifndef EVENT_H
+#define EVENT_H
 
 #include "Interval.h"
 #include <iostream>

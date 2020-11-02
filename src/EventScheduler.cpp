@@ -17,6 +17,8 @@ EventScheduler::SectionID EventScheduler::getSectionID(int eventID,
 bool EventScheduler::sectionConflictsWithSchedule(Schedule& sched,
 	SectionID sec) const {
 	
+	// examine the this -> conflicts graph; if there is an edge between any
+	// node of in sched and the sec node, return that there is a conflict
 	auto& sectionConflicts = this -> conflicts.at(sec);
 	for (SectionID schedSec: sched) {
 		if (sectionConflicts.contains(schedSec)) {
@@ -100,15 +102,19 @@ void EventScheduler::addConflicts(int id, const Event& event) {
 // output the internal information of the Event Scheduler in human readable
 // format
 void EventScheduler::display(std::ostream& os) const {
+	
+	// display each event that has been added to the scheduler
 	for (auto& eventInfo: this -> events) {
 		int eventID = eventInfo.first;
 		os << "Event id " << eventID << ":" << std::endl;
 		
+		// display the times and conflicts for each event section
 		const Event& event = eventInfo.second;
 		for (unsigned int i = 0; i < event.size(); ++i) {
 			os << "\tSection " << i << ":" << std::endl;
 			os << "\t\tTimes: " << event.getSection(i) << std::endl;
 
+			// list each conflict in format Event XXX Section XXX
 			SectionID secID = this -> getSectionID(eventID, i);
 			os << "\t\tConflicts: ";
 			for (auto conflictID: this -> conflicts.at(secID)) {
@@ -128,6 +134,8 @@ void EventScheduler::display(std::ostream& os) const {
 // use a simple approach that tries to add classes in priority order
 // return the best schedule found in a vector where each entry contains
 // first the event id and second the section index
+// This is effectively a brute force attempt to find the independent set of the
+// conflicts graph that has the largest combined weight
 std::vector<std::pair<int, unsigned int>> EventScheduler::buildOptimalSchedule()
 	const {
 
