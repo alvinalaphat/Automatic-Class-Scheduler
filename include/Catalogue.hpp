@@ -10,6 +10,10 @@
 #include <utility>
 #include <vector>
 
+/**
+ *  Note: This will get refactored into decl and impl files. This is not final.
+ */
+
 #define TIMES_TYPE std::vector<std::pair<double, double>>
 #define ID_TYPE unsigned int
 
@@ -41,7 +45,7 @@ public:
         std::cout << time.first << " " << time.second << std::endl;
       }
     }
-#endif /* CATALOGUE_DEBUG */
+#endif /* CATALOGUE_VERBOSE */
   }
 
   std::vector<ID_TYPE> getIds() {
@@ -53,7 +57,7 @@ public:
   }
 
   size_t size() { return events_.size(); }
-  
+
   TIMES_TYPE get(ID_TYPE eventId) {
     if (events_.find(eventId) != events_.end()) {
       return events_[eventId];
