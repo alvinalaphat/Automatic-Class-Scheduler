@@ -29,9 +29,9 @@ $(OBJ)/%.o: $(SRC)/%.cpp $(jsonTestDeps)
 	$(PP) $< -o $@ $(CXXFLAGS) -c
 
 # make CatalogueTest
-CatalogueTestObjs := $(OBJ)/CatalogueTest.o
+CatalogueTestObjs := $(OBJ)/CatalogueTest.o $(OBJ)/Catalogue.o $(OBJ)/Interval.o $(OBJ)/Event.o
 
-CatalogueTestDeps := $(INC)/Catalogue.h
+CatalogueTestDeps := $(INC)/Catalogue.h $(INC)/Interval.h $(INC)/Event.h
 
 CatalogueTest: $(EXE)/CatalogueTest
 	$(EXE)/./CatalogueTest

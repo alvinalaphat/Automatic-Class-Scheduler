@@ -1,72 +1,62 @@
-#ifndef CATALOGUE_HPP
-#define CATALOGUE_HPP
+#ifndef CATALOGUE_H
+#define CATALOGUE_H
 
+#include "Event.h"
+#include "Interval.h"
 #include "json.h"
-#include <algorithm>
-#include <fstream>
-#include <iostream>
 #include <string>
 #include <unordered_map>
-#include <utility>
-#include <vector>
 
-/**
- *  Note: This will get refactored into decl and impl files. This is not final.
- */
-
-#define TIMES_TYPE std::vector<std::pair<double, double>>
-#define ID_TYPE unsigned int
-
-class Catalogue {
-  std::unordered_map<ID_TYPE, TIMES_TYPE> events_;
+class Entry {
+  int mId;
+  std::string mName;
+  Event mEvent;
 
 public:
-  Catalogue() : events_() {}
-
-  void fromJson(std::string filename) {
-    std::ifstream file(filename);
-    nlohmann::json j;
-    file >> j;
-
-    // TODO: Here we'd validate the json with a schema.
-
-    for (size_t i = 0; i < j.size(); ++i) {
-      // Add each event to the map.
-      auto id = j[i]["id"].get<ID_TYPE>();
-      auto times = j[i]["times"].get<TIMES_TYPE>();
-      events_[id] = times;
-    }
-
-#define CATALOGUE_VERBOSE 0
-#if CATALOGUE_VERBOSE
-    for (const auto &[id, times] : events_) {
-      std::cout << "event #" << id << ":" << std::endl;
-      for (const auto &time : times) {
-        std::cout << time.first << " " << time.second << std::endl;
-      }
-    }
-#endif /* CATALOGUE_VERBOSE */
-  }
-
-  std::vector<ID_TYPE> getIds() {
-    std::vector<ID_TYPE> ret;
-    for (const std::pair<ID_TYPE, TIMES_TYPE> &p : events_) {
-      ret.push_back(p.first);
-    }
-    return ret;
-  }
-
-  size_t size() { return events_.size(); }
-
-  TIMES_TYPE get(ID_TYPE eventId) {
-    if (events_.find(eventId) != events_.end()) {
-      return events_[eventId];
-    } else {
-      return {};
-    }
-  }
-
-  TIMES_TYPE operator[](ID_TYPE eventId) { return get(eventId); }
+  Entry();
+  Entry(int, std::string, Event);
+  inline int id() const;
+  inline std::string name() const;
+  inline Event event() const;
+	friend std::ostream& operator<<(std::ostream&, const Entry&);
 };
 
-#endif /* CATALOGUE_HPP */
+/*
+Maybe later we can friend these functions inside the other classes.
+Right now they can't access their private variables so they can't fill 'em up.
+
+void from_json(const nlohmann::json &j, IntervalGroup &ig) {
+  std::cout << "Converting " << j << " into IntervalGroup." << std::endl;
+  j.get_to(ig.intervals);
+}
+
+void from_json(const nlohmann::json &j, Event &e) {
+  std::cout << "Converting " << j << " into Event." << std::endl;
+  j.get_to(e.sections);
+}
+
+void from_json(const nlohmann::json &j, Entry &e) {
+  std::cout << "Converting " << j << " into Entry." << std::endl;
+  j.at("id").get_to(e.id);
+  j.at("name").get_to(e.name);
+  j.at("times").get_to(e.event);
+}
+*/
+
+class Catalogue {
+
+  std::unordered_map<int, Entry> entries;
+
+public:
+  Catalogue();
+	Catalogue(std::string);
+
+  int load(std::string);
+	size_t size() const;
+	std::vector<int> ids() const;
+	Entry get(int);
+	Entry operator[](int);
+	friend std::ostream& operator<<(std::ostream&, const Catalogue&);
+};
+
+#endif /* CATALOGUE_H */
