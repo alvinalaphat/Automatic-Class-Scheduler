@@ -111,6 +111,11 @@ Entry Catalogue::operator[](int id) {
 
 std::ostream& operator<<(std::ostream& os, const Catalogue& cat) {
 	os << "Catalogue contains " << cat.size() << " entries." << std::endl;
+	os << "Ids are:" << std::endl;
+	for (auto const& id : cat.ids()) {
+		os << "  " << id << std::endl;
+	}
+	os << "Entries are:" << std::endl;
 	for (auto const& [id, entry] : cat.entries) {
 		os << entry;
 	}
