@@ -12,7 +12,7 @@
 class EventScheduler {
 	private:
 
-		// a unique idetifier for a particular section of an event
+		// a unique idetifier for a particular section of an event 
 		typedef uint64_t SectionID;
 
 		SectionID getSectionID(int eventID, unsigned int sectionIndex) const;
@@ -21,6 +21,17 @@ class EventScheduler {
 		typedef std::vector<SectionID> Schedule;
 
 		bool sectionConflictsWithSchedule(Schedule& sched, SectionID sec) const;
+
+		struct ScheduleWrapper {
+			double weight;
+			Schedule sched;
+			
+			bool operator<(const ScheduleWrapper& rhs) const;
+			bool operator>(const ScheduleWrapper& rhs) const;
+			bool operator<=(const ScheduleWrapper& rhs) const;
+			bool operator>=(const ScheduleWrapper& rhs) const;
+			bool operator==(const ScheduleWrapper& rhs) const;
+		};
 
 		// A wrapper for an event object which makes it comparable by an
 		// associated weight
@@ -58,6 +69,7 @@ class EventScheduler {
 		void display(std::ostream& os) const;
 
 		std::vector<std::pair<int, unsigned int>> buildOptimalSchedule() const;
+		std::vector<std::pair<int, unsigned int>> buildApproxSchedule() const;
 };
 
 #endif // EVENT_SCHEDULER_H

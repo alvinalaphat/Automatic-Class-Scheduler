@@ -3,6 +3,8 @@
 
 int main() {
 
+    /* ----------- Simple input test for optimal solution ----------*/
+
     // Build 3 Events with 3 sections a piece and add them to an event scheduler
     IntervalGroup e0s0({{0, 1}, {3, 4.5}, {8,9}});
     IntervalGroup e0s1({{2, 4}, {6, 8.5}});
@@ -35,6 +37,31 @@ int main() {
     // Display the optimal schedule that was found
     std::cout << std::endl << "Optimal schedule: ";
     for (auto evSec: schedule) {
+        std::cout << "Event " << evSec.first << " Section " << evSec.second << ", ";
+    }
+    std::cout << std::endl;
+
+
+    /* ----------- Input that is poor for optimal scheduilng --------------- */
+
+    EventScheduler eventSched2;
+    for (int i = 0; i < 20; ++i) {
+        std::vector<IntervalGroup> sections;
+        for (int j = 0; j < 5; ++j) {
+            sections.push_back(
+                IntervalGroup({{5 * i + j, 5 * i + j + 1}})
+            );
+        }
+
+        eventSched2.addEvent(Event(sections), i, i + 3);
+    }
+
+    eventSched2.display(std::cout);
+    auto schedule2 = eventSched2.buildApproxSchedule();
+
+    // Display the optimal schedule that was found
+    std::cout << std::endl << "Optimal schedule: ";
+    for (auto evSec: schedule2) {
         std::cout << "Event " << evSec.first << " Section " << evSec.second << ", ";
     }
     std::cout << std::endl;

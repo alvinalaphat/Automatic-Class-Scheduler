@@ -12,12 +12,13 @@ CFLAGS := -O0 -g -Wall -Wextra -Wconversion -Wshadow -pedantic -Werror -I$(INC)
 CXXFLAGS := -m64 -std=c++2a -Weffc++ $(CFLAGS)
 
 # make all
-all: jsonTest CatalogueTest IntervalTest EventSchedulerTest
+all: jsonTest CatalogueTest IntervalTest TopElemsHeapTest EventSchedulerTest 
+
+# general include dependencies
+DEPS := $(INC)/Interval.h $(INC)/Event.h $(INC)/EventScheduler.h $(INC)/TopElemsHeap.h $(INC)/json.hpp $(INC)/Catalogue.hpp
 
 # make JSONTest
 jsonTestObjs := $(OBJ)/jsonTest.o
-
-jsonTestDeps := $(INC)/json.hpp
 
 jsonTest: $(EXE)/jsonTest
 	$(EXE)/./jsonTest
@@ -25,25 +26,14 @@ jsonTest: $(EXE)/jsonTest
 $(EXE)/jsonTest: $(jsonTestObjs)
 	$(PP) $^ -o $@ $(CXXFLAGS)
 
-$(OBJ)/%.o: $(SRC)/%.cpp $(jsonTestDeps)
-	$(PP) $< -o $@ $(CXXFLAGS) -c
-
 # make CatalogueTest
 CatalogueTestObjs := $(OBJ)/CatalogueTest.o
-
-CatalogueTestDeps := $(INC)/Priority.hpp $(INC)/PriorityQueue.hpp
 
 CatalogueTest: $(EXE)/CatalogueTest
 	$(EXE)/./CatalogueTest
 
 $(EXE)/CatalogueTest: $(CatalogueTestObjs)
 	$(PP) $^ -o $@ $(CXXFLAGS)
-
-$(OBJ)/%.o: $(SRC)/%.cpp $(CatalogueTestDeps)
-	$(PP) $< -o $@ $(CXXFLAGS) -c
-
-# general include dependencies
-DEPS := $(INC)/Interval.h $(INC)/Event.h $(INC)/EventScheduler.h
 
 # make IntervalTest
 IntervalTestObjs := $(OBJ)/IntervalTest.o $(OBJ)/Interval.o
@@ -63,6 +53,15 @@ EventSchedulerTest: $(EXE)/EventSchedulerTest
 $(EXE)/EventSchedulerTest: $(EventSchedulerTestObjs)
 	$(PP) $^ -o $@ $(CXXFLAGS)
 
+# make TopElemsHeapTest
+TopElemsHeapTestObjs := $(OBJ)/TopElemsHeapTest.o
+
+TopElemsHeapTest: $(EXE)/TopElemsHeapTest
+	./$<
+
+$(EXE)/TopElemsHeapTest: $(TopElemsHeapTestObjs)
+	$(PP) $^ -o $@ $(CXXFLAGS)
+
 # general rule for making all object files
 $(OBJ)/%.o: $(SRC)/%.cpp $(DEPS)
 	$(PP) -c -o $@ $< $(CXXFLAGS)
@@ -75,4 +74,4 @@ initialize:
 clean:
 	rm -rf $(OBJ)/* $(EXE)/*
 
-.PHONY: all IntervalTest EventSchedulerTest initialize clean
+.PHONY: all IntervalTest EventSchedulerTest TopElemsHeapTest initialize clean

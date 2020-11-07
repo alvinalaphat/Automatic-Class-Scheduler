@@ -1,5 +1,6 @@
 
 #include "EventScheduler.h" 
+#include "TopElemsHeap.h"
 
 // EventScheduler constructor
 EventScheduler::EventScheduler() : eventsToSchedule(), events(), conflicts() {}
@@ -10,6 +11,24 @@ EventScheduler::SectionID EventScheduler::getSectionID(int eventID,
 	unsigned int sectionIndex) const {
 
 	return ((SectionID)eventID << 32) | (SectionID)sectionIndex;
+}
+
+// comparison operators for an EventWrapper so that it can be used in a priority
+// queue
+bool EventScheduler::ScheduleWrapper::operator<(const ScheduleWrapper& rhs) const {
+	return this -> weight < rhs.weight;
+}
+bool EventScheduler::ScheduleWrapper::operator>(const ScheduleWrapper& rhs) const {
+	return this -> weight > rhs.weight;
+}
+bool EventScheduler::ScheduleWrapper::operator<=(const ScheduleWrapper& rhs) const {
+	return this -> weight <= rhs.weight;
+}
+bool EventScheduler::ScheduleWrapper::operator>=(const ScheduleWrapper& rhs) const {
+	return this -> weight >= rhs.weight;
+}
+bool EventScheduler::ScheduleWrapper::operator==(const ScheduleWrapper& rhs) const {
+	return this -> weight == rhs.weight;
 }
 
 // sectionConflictsWithSchedule
@@ -143,7 +162,7 @@ std::vector<std::pair<int, unsigned int>> EventScheduler::buildOptimalSchedule()
 	auto unscheduled = this -> eventsToSchedule;
 
 	// 
-	std::vector<std::pair<double, Schedule>> schedules = {{0, {}}};
+	std::vector<ScheduleWrapper> schedules = {{0, {}}};
 
 	while (!unscheduled.empty()) {
 
@@ -152,7 +171,7 @@ std::vector<std::pair<int, unsigned int>> EventScheduler::buildOptimalSchedule()
 		unscheduled.pop();
 
 		// a set of schedules where we have attempted to add the new section
-		std::vector<std::pair<double, Schedule>> newSchedules;
+		std::vector<ScheduleWrapper> newSchedules;
 		
 		// go through each schedule and attempt to modify it
 		for (auto& schedule: schedules) {
@@ -163,13 +182,13 @@ std::vector<std::pair<int, unsigned int>> EventScheduler::buildOptimalSchedule()
 				SectionID secID = this -> getSectionID(ew.id, i);
 				// check if the section can be added to the schedule without
 				// creating conflicts
-				if (!this -> sectionConflictsWithSchedule(schedule.second,
+				if (!this -> sectionConflictsWithSchedule(schedule.sched,
 					secID)) {
 					
 					// create a new schedule and add it to our list
-					Schedule newSchedule = schedule.second;
+					Schedule newSchedule = schedule.sched;
 					newSchedule.push_back(secID);
-					double newWeight = schedule.first + ew.weight;
+					double newWeight = schedule.weight + ew.weight;
 					newSchedules.push_back({newWeight, newSchedule});
 				}
 			}
@@ -177,14 +196,16 @@ std::vector<std::pair<int, unsigned int>> EventScheduler::buildOptimalSchedule()
 
 		// augment the schedules already made with the new ones
 		schedules.insert(schedules.end(), newSchedules.begin(), newSchedules.end());
+
+		std::cout << schedules.size() <<std::endl;
 	}
 
 	// debugging -- print candidate schedules
 	std::cout << "Potential schedules" << std::endl;
 	for (auto& sched: schedules) {
-		std::cout << "\tweight = " << sched.first << ": ";
+		std::cout << "\tweight = " << sched.weight << ": ";
 
-		for (SectionID secID: sched.second) {
+		for (SectionID secID: sched.sched) {
 			std::cout << "Event " << (int)(secID >> 32) << " Section " <<
 				(unsigned int)(secID) << ", ";
 		}
@@ -197,15 +218,87 @@ std::vector<std::pair<int, unsigned int>> EventScheduler::buildOptimalSchedule()
 	double bestWeight = 0;
 	for (size_t i = 0; i < schedules.size(); ++i) {
 
-		if (schedules[i].first > bestWeight) {
+		if (schedules[i].weight > bestWeight) {
 			bestIndex = i;
-			bestWeight = schedules[i].first;
+			bestWeight = schedules[i].weight;
 		}
 	}
 
 	// convert that schedule into the return format
 	std::vector<std::pair<int, unsigned int>> retSched;
-	for (SectionID secID: schedules[bestIndex].second) {
+	for (SectionID secID: schedules[bestIndex].sched) {
+		
+		retSched.push_back({(int)(secID >> 32), (unsigned int)secID});
+	}
+
+	return retSched;
+}
+
+// buildApproxSchedule
+// use the same technique as buildOptimalSchedule, but limit the number of
+// schedules under consideration every round
+std::vector<std::pair<int, unsigned int>> EventScheduler::buildApproxSchedule()
+	const {
+
+	// copy the unscheduled events so that we don't overwrite the class member
+	auto unscheduled = this -> eventsToSchedule;
+
+	// 
+	//std::vector<ScheduleWrapper> schedules = {{0, {}}};
+	TopElemsHeap<ScheduleWrapper> schedules(1000);
+	schedules.push({0, {}});
+
+	while (!unscheduled.empty()) {
+
+		// remove highest priority event
+		EventWrapper ew = unscheduled.top();
+		unscheduled.pop();
+
+		// a set of schedules where we have attempted to add the new section
+		std::vector<ScheduleWrapper> newSchedules;
+		
+		// go through each schedule and attempt to modify it
+		for (auto schedule: schedules.getElements()) {
+
+			// attempt to add each section the event to the schedule
+			for (unsigned int i = 0; i < ew.event.size(); ++i) {
+				
+				SectionID secID = this -> getSectionID(ew.id, i);
+				// check if the section can be added to the schedule without
+				// creating conflicts
+				if (!this -> sectionConflictsWithSchedule(schedule.sched,
+					secID)) {
+					
+					// create a new schedule and add it to our list
+					Schedule newSchedule = schedule.sched;
+					newSchedule.push_back(secID);
+					double newWeight = schedule.weight + ew.weight;
+					newSchedules.push_back({newWeight, newSchedule});
+				}
+			}
+		}
+
+		// augment the schedules already made with the new ones
+		//schedules.insert(schedules.end(), newSchedules.begin(), newSchedules.end());
+		for (auto& schedule: newSchedules) {
+			schedules.push(schedule);
+		}
+	}
+
+	// find the best schedule
+	size_t bestIndex = 0;
+	double bestWeight = 0;
+	for (size_t i = 0; i < schedules.getElements().size(); ++i) {
+
+		if (schedules.getElements()[i].weight > bestWeight) {
+			bestIndex = i;
+			bestWeight = schedules.getElements()[i].weight;
+		}
+	}
+
+	// convert that schedule into the return format
+	std::vector<std::pair<int, unsigned int>> retSched;
+	for (SectionID secID: schedules.getElements()[bestIndex].sched) {
 		
 		retSched.push_back({(int)(secID >> 32), (unsigned int)secID});
 	}
