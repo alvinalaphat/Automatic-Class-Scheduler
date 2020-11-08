@@ -1,62 +1,75 @@
 #ifndef CATALOGUE_H
 #define CATALOGUE_H
 
+/* ---------------------------------------------------------------------- */
+
 #include "Event.h"
 #include "Interval.h"
 #include "json.h"
 #include <string>
 #include <unordered_map>
 
-class Entry {
-  int mId;
-  std::string mName;
-  Event mEvent;
+/* ---------------------------------------------------------------------- */
+
+class Entry
+{
 
 public:
+
   Entry();
-  Entry(int, std::string, Event);
-  inline int id() const { return mId; }
-  inline std::string name() const { return mName; }
-  inline Event event() const { return mEvent; }
-	friend std::ostream& operator<<(std::ostream&, const Entry&);
+  Entry(int p_id, std::string p_name, Event p_event);
+
+  inline int id() const { return m_id; }
+  inline std::string name() const { return m_name; }
+  inline Event event() const { return m_event; }
+
+  friend std::ostream& operator<<(std::ostream&, const Entry&);
+
+private:
+
+  int m_id;
+  std::string m_name;
+  Event m_event;
+
 };
 
-/*
-Maybe later we can friend these functions inside the other classes.
-Right now they can't access their private variables so they can't fill 'em up.
+/* ---------------------------------------------------------------------- */
 
-void from_json(const nlohmann::json &j, IntervalGroup &ig) {
-  std::cout << "Converting " << j << " into IntervalGroup." << std::endl;
-  j.get_to(ig.intervals);
-}
-
-void from_json(const nlohmann::json &j, Event &e) {
-  std::cout << "Converting " << j << " into Event." << std::endl;
-  j.get_to(e.sections);
-}
-
-void from_json(const nlohmann::json &j, Entry &e) {
-  std::cout << "Converting " << j << " into Entry." << std::endl;
-  j.at("id").get_to(e.id);
-  j.at("name").get_to(e.name);
-  j.at("times").get_to(e.event);
-}
-*/
-
-class Catalogue {
-
-  std::unordered_map<int, Entry> entries;
+class Catalogue
+{
 
 public:
-  Catalogue();
-	Catalogue(std::string);
 
-  int load(std::string);
-	size_t size() const;
-	std::vector<int> ids() const;
-	Entry get(int);
-	Entry operator[](int);
-	friend std::ostream& operator<<(std::ostream&, const Catalogue&);
+  Catalogue();
+
+  // Attempts to fill self (m_entries) with courses from json catalogue.
+  Catalogue(std::string json_filename);
+
+  // Fills self (m_entries) with courses from json catalogue.
+  // Returns EXIT_SUCCESS on succes and EXIT_FAILURE on failure.
+  int load(std::string json_filename);
+
+  // Returns number of entries in catalogue.
+  inline size_t size() const { return m_entries.size(); }
+
+  // Returns all ids in catalogue.
+  std::vector<int> ids() const;
+
+  // Both attempt to get Entry with given id, return empty Entry on failure.
+  Entry get(int p_id);
+  Entry operator[](int p_id);
+
+  // Returns TRUE if id exists in entries, else FALSE.
+  inline bool has(int p_id) const { return m_entries.find(p_id) != m_entries.end(); }
+  
+  friend std::ostream& operator<<(std::ostream&, const Catalogue&);
+
+private:
+
+  std::unordered_map<int, Entry> m_entries;
+
 };
+
+/* ---------------------------------------------------------------------- */
 
 #endif /* CATALOGUE_H */
