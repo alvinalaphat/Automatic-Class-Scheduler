@@ -10,33 +10,33 @@
 
 /* ---------------------------------------------------------------------- */
 
-Entry::Entry() : mId(0), mName(""), mEvent() {}
+Entry::Entry() : m_id(0), m_name(""), m_event() {}
 
-Entry::Entry(int pId, std::string pName, Event pEvent)
-    : mId(pId), mName(pName), mEvent(pEvent) {}
+Entry::Entry(int p_id, std::string p_name, Event p_event)
+    : m_id(p_id), m_name(p_name), m_event(p_event) {}
 
 std::ostream& operator<<(std::ostream& os, const Entry& e) {
-	os << "Entry with id " << e.mId << std::endl;
-	os << "  Name is \"" << e.mName << "\"" << std::endl;
-	e.mEvent.display(std::cout, "  ");
+	os << "Entry with id " << e.m_id << std::endl;
+	os << "  Name is \"" << e.m_name << "\"" << std::endl;
+	e.m_event.display(std::cout, "  ");
 	return os;
 }
 
 /* ---------------------------------------------------------------------- */
 
-Catalogue::Catalogue() : entries() {}
+Catalogue::Catalogue() : m_entries() {}
 
-Catalogue::Catalogue(std::string filename) : entries() {
-	if (not load(filename)) {
-		std::cerr << "Failure loading " << filename << "as catalogue!" << std::endl;
+Catalogue::Catalogue(std::string json_filename) : m_entries() {
+	if (not load(json_filename)) {
+		std::cerr << "Failure loading " << json_filename << "as catalogue!" << std::endl;
 	}
 }
 
 
-int Catalogue::load(std::string filename) {
+int Catalogue::load(std::string json_filename) {
 
 	// read file into json if possible
-  std::ifstream file(filename);
+  std::ifstream file(json_filename);
 	if (not file.is_open()) {
 		return EXIT_FAILURE;
 	}
@@ -67,7 +67,7 @@ int Catalogue::load(std::string filename) {
     }
 
 		// finally, construct it and add it to the entries map
-    entries[id] = {id, name, secs};
+    m_entries[id] = {id, name, secs};
   }
 
 #if 0 /* Catalogue::load debug. */
@@ -87,23 +87,23 @@ int Catalogue::load(std::string filename) {
 
 std::vector<int> Catalogue::ids() const {
 	std::vector<int> ret;
-	for (auto const& [id, entry] : entries) {
+	for (auto const& [id, entry] : m_entries) {
 		ret.push_back(id);
 	}
 	return ret;
 }
 
 
-Entry Catalogue::get(int id) {
-	if (entries.find(id) == entries.end()) {
+Entry Catalogue::get(int p_id) {
+	if (m_entries.find(p_id) == m_entries.end()) {
 		return {};
 	} else {
-		return entries[id];
+		return m_entries[p_id];
 	}
 }
 
-Entry Catalogue::operator[](int id) {
-	return get(id);
+Entry Catalogue::operator[](int p_id) {
+	return get(p_id);
 }
 
 
@@ -114,7 +114,7 @@ std::ostream& operator<<(std::ostream& os, const Catalogue& cat) {
 		os << "  " << id << std::endl;
 	}
 	os << "Entries are:" << std::endl;
-	for (auto const& [id, entry] : cat.entries) {
+	for (auto const& [id, entry] : cat.m_entries) {
 		os << entry;
 	}
 	return os;

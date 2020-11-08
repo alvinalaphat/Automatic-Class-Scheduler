@@ -63,7 +63,7 @@ public:
 
 private:
 
-  std::unordered_map<int, Catalogue> m_entries;
+  std::unordered_map<int, Entry> m_entries;
 
 };
 
