@@ -59,6 +59,9 @@ public:
   Entry get(int p_id);
   Entry operator[](int p_id);
 
+  // Returns TRUE if id exists in entries, else FALSE.
+  inline bool has(int p_id) const { return m_entries.find(p_id) != m_entries.end(); }
+  
   friend std::ostream& operator<<(std::ostream&, const Catalogue&);
 
 private:
