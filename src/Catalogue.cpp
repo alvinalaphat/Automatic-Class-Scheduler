@@ -8,16 +8,12 @@
 #include <utility>
 #include <vector>
 
+/* ---------------------------------------------------------------------- */
 
-/* Will refactor Entry into another class. */
 Entry::Entry() : mId(0), mName(""), mEvent() {}
 
 Entry::Entry(int pId, std::string pName, Event pEvent)
     : mId(pId), mName(pName), mEvent(pEvent) {}
-
-inline int Entry::id() const { return mId; }
-inline std::string Entry::name() const { return mName; }
-inline Event Entry::event() const { return mEvent; }
 
 std::ostream& operator<<(std::ostream& os, const Entry& e) {
 	os << "Entry with id " << e.mId << std::endl;
@@ -26,13 +22,16 @@ std::ostream& operator<<(std::ostream& os, const Entry& e) {
 	return os;
 }
 
-/* Catalogue impl. */
+/* ---------------------------------------------------------------------- */
+
 Catalogue::Catalogue() : entries() {}
+
 Catalogue::Catalogue(std::string filename) : entries() {
 	if (not load(filename)) {
-		std::cerr << "Could not load " << filename << std::endl;
+		std::cerr << "Failure loading " << filename << "as catalogue!" << std::endl;
 	}
 }
+
 
 int Catalogue::load(std::string filename) {
 
@@ -85,9 +84,6 @@ int Catalogue::load(std::string filename) {
       return EXIT_SUCCESS;
 }
 
-size_t Catalogue::size() const {
-	return entries.size();
-}
 
 std::vector<int> Catalogue::ids() const {
 	std::vector<int> ret;
@@ -96,6 +92,7 @@ std::vector<int> Catalogue::ids() const {
 	}
 	return ret;
 }
+
 
 Entry Catalogue::get(int id) {
 	if (entries.find(id) == entries.end()) {
@@ -108,6 +105,7 @@ Entry Catalogue::get(int id) {
 Entry Catalogue::operator[](int id) {
 	return get(id);
 }
+
 
 std::ostream& operator<<(std::ostream& os, const Catalogue& cat) {
 	os << "Catalogue contains " << cat.size() << " entries." << std::endl;
