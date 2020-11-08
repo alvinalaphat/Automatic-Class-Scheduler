@@ -12,7 +12,7 @@ CFLAGS := -O0 -g -Wall -Wextra -Wconversion -Wshadow -pedantic -Werror -I$(INC)
 CXXFLAGS := -m64 -std=c++2a -Weffc++ $(CFLAGS)
 
 # make all
-all: jsonTest CatalogueTest IntervalTest TopElemsHeapTest EventSchedulerTest 
+all: jsonTest CatalogueTest IntervalTest TopElemsHeapTest EventSchedulerTest Application
 
 # general include dependencies
 DEPS := $(INC)/Interval.h $(INC)/Event.h $(INC)/EventScheduler.h $(INC)/TopElemsHeap.h $(INC)/json.h $(INC)/Catalogue.h
@@ -62,6 +62,15 @@ TopElemsHeapTest: $(EXE)/TopElemsHeapTest
 $(EXE)/TopElemsHeapTest: $(TopElemsHeapTestObjs)
 	$(PP) $^ -o $@ $(CXXFLAGS)
 
+# make Application
+ApplicationObjs := $(OBJ)/Application.o $(OBJ)/Catalogue.o $(OBJ)/Event.o $(OBJ)/Interval.o $(OBJ)/EventScheduler.o
+
+Application: $(EXE)/Application
+	./$<
+
+$(EXE)/Application: $(ApplicationObjs)
+	$(PP) $^ -o $@ $(CXXFLAGS)
+
 # general rule for making all object files
 $(OBJ)/%.o: $(SRC)/%.cpp $(DEPS)
 	$(PP) -c -o $@ $< $(CXXFLAGS)
@@ -74,4 +83,4 @@ initialize:
 clean:
 	rm -rf $(OBJ)/* $(EXE)/*
 
-.PHONY: all IntervalTest EventSchedulerTest TopElemsHeapTest initialize clean
+.PHONY: all IntervalTest EventSchedulerTest TopElemsHeapTest Application initialize clean

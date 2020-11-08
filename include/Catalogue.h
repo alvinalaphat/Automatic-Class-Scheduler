@@ -15,9 +15,9 @@ class Entry {
 public:
   Entry();
   Entry(int, std::string, Event);
-  inline int id() const;
-  inline std::string name() const;
-  inline Event event() const;
+  inline int id() const { return mId; }
+  inline std::string name() const { return mName; }
+  inline Event event() const { return mEvent; }
 	friend std::ostream& operator<<(std::ostream&, const Entry&);
 };
 

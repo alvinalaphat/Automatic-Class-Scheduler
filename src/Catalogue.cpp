@@ -15,10 +15,6 @@ Entry::Entry() : mId(0), mName(""), mEvent() {}
 Entry::Entry(int pId, std::string pName, Event pEvent)
     : mId(pId), mName(pName), mEvent(pEvent) {}
 
-inline int Entry::id() const { return mId; }
-inline std::string Entry::name() const { return mName; }
-inline Event Entry::event() const { return mEvent; }
-
 std::ostream& operator<<(std::ostream& os, const Entry& e) {
 	os << "Entry with id " << e.mId << std::endl;
 	os << "  Name is \"" << e.mName << "\"" << std::endl;
