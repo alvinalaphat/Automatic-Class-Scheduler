@@ -201,7 +201,7 @@ std::vector<std::pair<int, unsigned int>> EventScheduler::buildOptimalSchedule()
 	}
 
 	// debugging -- print candidate schedules
-	std::cout << "Potential schedules" << std::endl;
+	/*std::cout << "Potential schedules" << std::endl;
 	for (auto& sched: schedules) {
 		std::cout << "\tweight = " << sched.weight << ": ";
 
@@ -211,7 +211,7 @@ std::vector<std::pair<int, unsigned int>> EventScheduler::buildOptimalSchedule()
 		}
 
 		std::cout << std::endl;
-	}
+	}*/
 
 	// find the best schedule
 	size_t bestIndex = 0;

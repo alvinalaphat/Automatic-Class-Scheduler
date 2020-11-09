@@ -8,7 +8,7 @@ EXE := exe
 
 PP := g++
 
-CFLAGS := -O0 -g -Wall -Wextra -Wconversion -Wshadow -pedantic -Werror -I$(INC)
+CFLAGS := -O2 -g -pg -Wall -Wextra -Wconversion -Wshadow -pedantic -Werror -I$(INC)
 CXXFLAGS := -m64 -std=c++2a -Weffc++ $(CFLAGS)
 
 # make all
@@ -53,6 +53,15 @@ EventSchedulerTest: $(EXE)/EventSchedulerTest
 $(EXE)/EventSchedulerTest: $(EventSchedulerTestObjs)
 	$(PP) $^ -o $@ $(CXXFLAGS)
 
+# make EventSchedulerPerfTest
+EventSchedulerPerfTestObjs := $(OBJ)/EventSchedulerPerfTest.o $(OBJ)/Interval.o $(OBJ)/Event.o $(OBJ)/EventScheduler.o
+
+EventSchedulerPerfTest: $(EXE)/EventSchedulerPerfTest
+	./$<
+
+$(EXE)/EventSchedulerPerfTest: $(EventSchedulerPerfTestObjs)
+	$(PP) $^ -o $@ $(CXXFLAGS)
+
 # make TopElemsHeapTest
 TopElemsHeapTestObjs := $(OBJ)/TopElemsHeapTest.o
 
@@ -74,4 +83,4 @@ initialize:
 clean:
 	rm -rf $(OBJ)/* $(EXE)/*
 
-.PHONY: all IntervalTest EventSchedulerTest TopElemsHeapTest initialize clean
+.PHONY: all IntervalTest EventSchedulerTest EventSchedulerPerfTest TopElemsHeapTest initialize clean
