@@ -3,6 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 import json
 import argparse
+import sys
 
 def getSubjects():
     '''scrape a list of subject codes for ND courses'''
@@ -155,20 +156,129 @@ def parseLocation(s):
     loc = ", ".join(part.strip() for part in s.split('\n') if not part.isspace())
     return {"location" : loc}        
 
+def getTerms():
+    '''scrape a list of term codes for ND courses'''
+
+    url = "https://class-search.nd.edu/reg/srch/ClassSearchServlet"
+    html = requests.post(url).text
+
+    # get the terms from the term select box
+    terms = {}
+    termNode = BeautifulSoup(html, 'lxml').find('select', attrs={'name': 'TERM'})
+    termOptions = termNode.find_all('option')
+    for option in termOptions:
+        terms[option.text.strip()] = option['value']
+    
+    # example:
+    # {'Spring Semester 2021': '202020'}
+
+    return terms
+
+def getDivs():
+    '''scrape a list of divisions for ND courses'''
+
+    url = "https://class-search.nd.edu/reg/srch/ClassSearchServlet"
+    html = requests.post(url).text
+
+    # get the divs from the div select box
+    divs = {}
+    divNode = BeautifulSoup(html, 'lxml').find('select', attrs={'name': 'DIVS'})
+    divOptions = divNode.find_all('option')
+    for option in divOptions:
+        divs[option.text.strip()] = option['value']
+    
+    # example:
+    # {'All': 'A'}
+
+    return divs
+
+def getCampuses():
+    '''scrape list of campuses for ND courses'''
+
+    url = "https://class-search.nd.edu/reg/srch/ClassSearchServlet"
+    html = requests.post(url).text
+
+    # get the campuses from the campus select box
+    campuses = {}
+    campusNode = BeautifulSoup(html, 'lxml').find('select', attrs={'name': 'CAMPUS'})
+    campusOptions = campusNode.find_all('option')
+    for option in campusOptions:
+        campuses[option.text.strip()] = option['value']
+    
+    # example:
+    # {'Addis Ababa, Ethiopia': 'AE'}
+
+    return campuses
+
+def getAttrs():
+    '''scrape list of attributes for ND courses'''
+
+    url = "https://class-search.nd.edu/reg/srch/ClassSearchServlet"
+    html = requests.post(url).text
+
+    # get the attributes from the attr select box
+    attrs = {}
+    attrNode = BeautifulSoup(html, 'lxml').find('select', id="ATTR")
+    attrOptions = attrNode.find_all('option')
+    for option in attrOptions:
+        attrs[option.text.strip()] = option['value']
+    
+    # example:
+    # {'Addis Ababa, Ethiopia': 'AE'}
+
+    return attrs
+
+def getCredit():
+    '''scrape list of credit hours for ND courses'''
+
+    url = "https://class-search.nd.edu/reg/srch/ClassSearchServlet"
+    html = requests.post(url).text
+
+    # get the attributes from the attr select box
+    credit = {}
+    creditNode = BeautifulSoup(html, 'lxml').find('select', attrs={'name': 'CREDIT'})
+    creditOptions = creditNode.find_all('option')
+    for option in creditOptions:
+        credit[option.text.strip()] = option['value']
+    
+    # example:
+    # {'Addis Ababa, Ethiopia': 'AE'}
+
+    return credit
+
 def getSubjectCatalogue(subjectCode):
     '''get a list of course section for a given subject code. Return a list of
     dictionaries'''
 
     courses = []
 
+    # static variables so we do not have to get them every func call
+    if not hasattr(getSubjectCatalogue, "terms"):
+        getSubjectCatalogue.terms = getTerms()
+    if not hasattr(getSubjectCatalogue, "divs"):
+        getSubjectCatalogue.divs = getDivs()
+    if not hasattr(getSubjectCatalogue, "campuses"):
+        getSubjectCatalogue.campuses = getCampuses()
+    if not hasattr(getSubjectCatalogue, "attrs"):
+        getSubjectCatalogue.attrs = getAttrs()
+    if not hasattr(getSubjectCatalogue, "credit"):
+        getSubjectCatalogue.credit = getCredit()
+    
+    # translate readable field names into form codes
+    terms = getSubjectCatalogue.terms
+    divs = getSubjectCatalogue.divs
+    campuses = getSubjectCatalogue.campuses
+    attrs = getSubjectCatalogue.attrs
+    credit = getSubjectCatalogue.credit
+
     url = "https://class-search.nd.edu/reg/srch/ClassSearchServlet"
     courseReq = {
-        "TERM":     "202010",
-        "DIVS": 	"A",
-        "CAMPUS":	"M",
-        "SUBJ":      subjectCode,
-        "ATTR": 	"0ANY",
-        "CREDIT":  	"A"
+        "TERM":     terms['Spring Semester 2021'],
+        "DIVS": 	divs['All'],
+        "CAMPUS":	campuses['Main'],
+        "SUBJ":     subjectCode,
+        "ATTR": 	attrs['Any'],
+        "CREDIT":  	credit['All']
     }
 
     html = requests.post(url, data=courseReq).text
