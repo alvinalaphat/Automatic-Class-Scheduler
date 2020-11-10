@@ -40,5 +40,8 @@ for line in lines:
 
 funcInfo.sort(key = lambda x: x['self'], reverse=True)
 
-for fi in funcInfo[:20]:
-    print(fi)
+for fi in funcInfo[:10]:
+    print(fi['name'])
+    print('\tPercent:\t', fi['percent'])
+    print('\tTotal time:\t', fi['self'])
+    print('\t# of calls:\t', int(fi['calls']))

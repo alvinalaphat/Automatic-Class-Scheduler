@@ -6,9 +6,9 @@ int main() {
     /* ----------- Input that is poor for optimal scheduilng --------------- */
 
     EventScheduler eventSched;
-    for (int i = 0; i < 1000; ++i) {
+    for (int i = 0; i < 100; ++i) {
         std::vector<IntervalGroup> sections;
-        for (int j = 0; j < 5; ++j) {
+        for (int j = 0; j < 20; ++j) {
             sections.push_back(
                 IntervalGroup({{5 * i + j, 5 * i + j + 1}})
             );
