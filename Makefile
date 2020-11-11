@@ -27,7 +27,7 @@ $(EXE)/jsonTest: $(jsonTestObjs)
 	$(PP) $^ -o $@ $(CXXFLAGS)
 
 # make CatalogueTest
-CatalogueTestObjs := $(OBJ)/CatalogueTest.o $(OBJ)/Catalogue.o $(OBJ)/Interval.o $(OBJ)/Event.o
+CatalogueTestObjs := $(OBJ)/CatalogueTest.o $(OBJ)/Catalogue.o $(OBJ)/Interval.o $(OBJ)/Event.o $(OBJ)/Fuzzy.o
 
 CatalogueTest: $(EXE)/CatalogueTest
 	$(EXE)/./CatalogueTest
@@ -63,7 +63,7 @@ $(EXE)/TopElemsHeapTest: $(TopElemsHeapTestObjs)
 	$(PP) $^ -o $@ $(CXXFLAGS)
 
 # make FuzzyTest
-FuzzyTestObjs := $(OBJ)/FuzzyTest.o
+FuzzyTestObjs := $(OBJ)/FuzzyTest.o $(OBJ)/Fuzzy.o
 
 FuzzyTest: $(EXE)/FuzzyTest
 	./$<

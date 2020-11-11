@@ -7,6 +7,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <TopElemsHeap.h>
+#include <Comparable.h>
 
 /* ---------------------------------------------------------------------- */
 
@@ -118,4 +120,14 @@ std::ostream& operator<<(std::ostream& os, const Catalogue& cat) {
 		os << entry;
 	}
 	return os;
+}
+
+
+std::vector<Comparable<Entry>> Catalogue::search(const std::string& name) const {
+	const size_t max_results = 10;
+	TopElemsHeap<Comparable<Entry>> heap(max_results);
+	for (const auto& [id, entry] : m_entries) {
+		heap.push({composite_similarity(name, entry.name()), entry});
+	}
+	return heap.getElements();
 }

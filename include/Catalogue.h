@@ -6,6 +6,8 @@
 #include "Event.h"
 #include "Interval.h"
 #include "json.h"
+#include "Fuzzy.h"
+#include "Comparable.h"
 #include <string>
 #include <unordered_map>
 
@@ -63,6 +65,9 @@ public:
   inline bool has(int p_id) const { return m_entries.find(p_id) != m_entries.end(); }
   
   friend std::ostream& operator<<(std::ostream&, const Catalogue&);
+
+  // Returns a vector of entries that are similar to name of class.
+  std::vector<Comparable<Entry>> search(const std::string& name) const;
 
 private:
 
