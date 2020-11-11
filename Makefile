@@ -12,10 +12,10 @@ CFLAGS := -O0 -g -Wall -Wextra -Wconversion -Wshadow -pedantic -Werror -I$(INC)
 CXXFLAGS := -m64 -std=c++2a -Weffc++ $(CFLAGS)
 
 # make all
-all: jsonTest CatalogueTest IntervalTest TopElemsHeapTest EventSchedulerTest Application
+all: jsonTest CatalogueTest IntervalTest TopElemsHeapTest EventSchedulerTest FuzzyTest Application
 
 # general include dependencies
-DEPS := $(INC)/Interval.h $(INC)/Event.h $(INC)/EventScheduler.h $(INC)/TopElemsHeap.h $(INC)/json.h $(INC)/Catalogue.h
+DEPS := $(INC)/Interval.h $(INC)/Event.h $(INC)/EventScheduler.h $(INC)/TopElemsHeap.h $(INC)/json.h $(INC)/Catalogue.h $(INC)/Fuzzy.h
 
 # make JSONTest
 jsonTestObjs := $(OBJ)/jsonTest.o
@@ -27,7 +27,7 @@ $(EXE)/jsonTest: $(jsonTestObjs)
 	$(PP) $^ -o $@ $(CXXFLAGS)
 
 # make CatalogueTest
-CatalogueTestObjs := $(OBJ)/CatalogueTest.o $(OBJ)/Catalogue.o $(OBJ)/Interval.o $(OBJ)/Event.o
+CatalogueTestObjs := $(OBJ)/CatalogueTest.o $(OBJ)/Catalogue.o $(OBJ)/Interval.o $(OBJ)/Event.o $(OBJ)/Fuzzy.o
 
 CatalogueTest: $(EXE)/CatalogueTest
 	$(EXE)/./CatalogueTest
@@ -63,12 +63,21 @@ $(EXE)/TopElemsHeapTest: $(TopElemsHeapTestObjs)
 	$(PP) $^ -o $@ $(CXXFLAGS)
 
 # make Application
-ApplicationObjs := $(OBJ)/Application.o $(OBJ)/Catalogue.o $(OBJ)/Event.o $(OBJ)/Interval.o $(OBJ)/EventScheduler.o
+ApplicationObjs := $(OBJ)/Application.o $(OBJ)/Catalogue.o $(OBJ)/Event.o $(OBJ)/Interval.o $(OBJ)/EventScheduler.o $(OBJ)/Fuzzy.o
 
 Application: $(EXE)/Application
 	./$<
 
 $(EXE)/Application: $(ApplicationObjs)
+	$(PP) $^ -o $@ $(CXXFLAGS)
+
+# make FuzzyTest
+FuzzyTestObjs := $(OBJ)/FuzzyTest.o $(OBJ)/Catalogue.o $(OBJ)/Interval.o $(OBJ)/Event.o $(OBJ)/Fuzzy.o
+
+FuzzyTest: $(EXE)/FuzzyTest
+	./$<
+
+$(EXE)/FuzzyTest: $(FuzzyTestObjs)
 	$(PP) $^ -o $@ $(CXXFLAGS)
 
 # general rule for making all object files
@@ -83,4 +92,4 @@ initialize:
 clean:
 	rm -rf $(OBJ)/* $(EXE)/*
 
-.PHONY: all IntervalTest EventSchedulerTest TopElemsHeapTest Application initialize clean
+.PHONY: all IntervalTest EventSchedulerTest TopElemsHeapTest FuzzyTest Application initialize clean
