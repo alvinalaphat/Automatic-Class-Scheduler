@@ -124,16 +124,12 @@ std::ostream& operator<<(std::ostream& os, const Catalogue& cat) {
 	return os;
 }
 
-/**
- * 	This isn't in the header because it's an implementation detail, but this is
- * 	an implementation of TF/IDF.
- */
 std::vector<Comparable<Entry>>
 Catalogue::search(
 	const std::string& name,
 	size_t max_results
 ) const {
-	
+
 	TopElemsHeap<Comparable<Entry>> heap(max_results);
 	for (const auto& [id, entry] : m_entries) {
 		heap.push({composite_similarity(name, entry.name()), entry});

@@ -101,7 +101,7 @@ int main() {
 
     size_t t7_max_results = 10;
     Catalogue cat("data/nd_courses.json");
-    std::string t7_query = "MOREAU";
+    std::string t7_query = "MOREAU first year exprience";
     std::vector<Comparable<Entry>> t7_results = cat.search(t7_query, t7_max_results);
 
     std::cout << "Top " << t7_max_results << " for '" << t7_query << "'" << std::endl;
