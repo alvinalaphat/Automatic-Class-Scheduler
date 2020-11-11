@@ -10,20 +10,9 @@
 #include <TopElemsHeap.h>
 #include <Fuzzy.h>
 
-template<typename Iter>
-std::unordered_map<typename std::iterator_traits<Iter>::value_type, size_t>
-make_frequency(Iter it, Iter end) {
-    std::unordered_map<
-        typename std::iterator_traits<Iter>::value_type, size_t> map;
-    for (; it != end; ++it) {
-        ++map[*it];
-    }
-    return map;
-}
-
 template<typename T, typename U>
 std::unordered_set<T> union_keys(
-    const std::unordered_map<T, U>& map1, 
+    const std::unordered_map<T, U>& map1,
     const std::unordered_map<T, U>& map2
 ) {
     std::unordered_set<T> unkeys;
@@ -78,7 +67,8 @@ size_t levenshtein_distance(const std::string& s1, const std::string& s2) {
 
     if (n == 0) {
         return m;
-    } else if (m == 0) {
+    }
+    else if (m == 0) {
         return n;
     }
 
@@ -95,7 +85,7 @@ size_t levenshtein_distance(const std::string& s1, const std::string& s2) {
 
     for (size_t i = 1; i < n + 1; ++i) {
         for (size_t j = 1; j < m + 1; ++j) {
-            
+
             size_t cost = (s1[i - 1] == s2[j - 1]) ? 0 : 1;
 
             matrix.at(i).at(j) = std::min(
@@ -120,8 +110,8 @@ std::string preprocess_string(const std::string& s) {
     std::string res = s;
 
     std::transform(res.begin(), res.end(), res.begin(),
-        [](unsigned char c){return std::tolower(c); });
-    
+        [](unsigned char c) {return std::tolower(c); });
+
     return res;
 }
 
@@ -133,8 +123,34 @@ double composite_similarity(const std::string& p_s1, const std::string& p_s2) {
     double cosine_sim = cosine_similarity(s1, s2);
     double levenshtein_sim =
         ((double)std::max(s1.size(), s2.size())
-        - (double)levenshtein_distance(s1, s2))
+            - (double)levenshtein_distance(s1, s2))
         / (double)std::max(s1.size(), s2.size());
-    
+
     return cosine_sim * levenshtein_sim;
+}
+
+std::vector<std::string> get_ngrams(const std::string& s, size_t chunk_length) {
+
+    std::vector<std::string> res;
+    std::string p = " " + s + " ";
+
+    size_t l = 0;
+
+    while (l + chunk_length <= p.size()) {
+        res.push_back(p.substr(l, chunk_length));
+        ++l;
+    }
+
+    return res;
+}
+
+std::unordered_map<std::string, size_t>
+make_ngram_freq(
+    const std::string& s, 
+    size_t chunk_length
+) {
+    std::vector<std::string> ngrams = get_ngrams(s, chunk_length);
+    std::unordered_map<std::string, size_t> res = make_frequency(
+        ngrams.begin(), ngrams.end());
+    return res;
 }

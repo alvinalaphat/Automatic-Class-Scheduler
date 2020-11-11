@@ -75,6 +75,19 @@ $(EXE)/FuzzyTest: $(FuzzyTestObjs)
 $(OBJ)/%.o: $(SRC)/%.cpp $(DEPS)
 	$(PP) -c -o $@ $< $(CXXFLAGS)
 
+# make BetterFuzzyTest
+BetterFuzzyTestObjs := $(OBJ)/BetterFuzzyTest.o $(OBJ)/Catalogue.o $(OBJ)/Interval.o $(OBJ)/Event.o $(OBJ)/Fuzzy.o
+
+BetterFuzzyTest: $(EXE)/BetterFuzzyTest
+	./$<
+
+$(EXE)/BetterFuzzyTest: $(BetterFuzzyTestObjs)
+	$(PP) $^ -o $@ $(CXXFLAGS)
+
+# general rule for making all object files
+$(OBJ)/%.o: $(SRC)/%.cpp $(DEPS)
+	$(PP) -c -o $@ $< $(CXXFLAGS)
+
 # make initialize
 initialize:
 	mkdir -p $(OBJ) $(EXE)

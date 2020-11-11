@@ -10,6 +10,7 @@
 #include <TopElemsHeap.h>
 #include <Comparable.h>
 #include <algorithm>
+#include <cmath>
 
 /* ---------------------------------------------------------------------- */
 
@@ -123,13 +124,45 @@ std::ostream& operator<<(std::ostream& os, const Catalogue& cat) {
 	return os;
 }
 
+/**
+ * 	This isn't in the header because it's an implementation detail, but this is
+ * 	an implementation of TF/IDF.
+ */
+std::vector<Comparable<Entry>>
+Catalogue::search(
+	const std::string& name,
+	size_t max_results
+) const {
 
-std::vector<Comparable<Entry>> Catalogue::search(const std::string& name, size_t max_results) const {
+/*
+	std::unordered_map<std::string, size_t> ngramfreq = make_ngram_freq(name);
+	std::cout << ngramfreq << std::endl;
+
+	// get frequency of all ngrams across all documents.
+	std::unordered_map<std::string, size_t> allngramocc;
+	for (const auto& [id, entry] : m_entries) {
+		for (const auto& [k, v] : make_ngram_freq(entry.name())) {
+			allngramocc[k] += 1;
+		}
+	}
+	std::cout << allngramocc << std::endl;
+
+	double weightsum = 0;
+	for (const auto& [k, v] : ngramfreq) {
+		std::cout << k << ' ' << v << ' ' << allngramocc[k] << std::endl;
+		weightsum += (double)v * std::log((double)m_entries.size() / (double)allngramocc[k]);
+	}
+	std::cout << weightsum << std::endl;
+
+	// useless thing to get flags away from me.
+	std::string hey = name;
+	std::size_t ho = max_results + 5;
+	for (size_t i = ho; i < 100; ++i);
+*/
+
 	TopElemsHeap<Comparable<Entry>> heap(max_results);
 	for (const auto& [id, entry] : m_entries) {
 		heap.push({composite_similarity(name, entry.name()), entry});
 	}
-	std::vector<Comparable<Entry>> result = heap.getElements();
-	std::sort(result.begin(), result.end());
 	return heap.getElements();
 }

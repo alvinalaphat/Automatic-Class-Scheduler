@@ -20,7 +20,15 @@
  */
 template<typename Iter>
 std::unordered_map<typename std::iterator_traits<Iter>::value_type, size_t>
-make_frequency(Iter it, Iter end);
+make_frequency(Iter it, Iter end) {
+    // note for later: this had to be in the header file to avoid ld errors, why?
+    std::unordered_map<
+        typename std::iterator_traits<Iter>::value_type, size_t> map;
+    for (; it != end; ++it) {
+        ++map[*it];
+    }
+    return map;
+}
 
 /**
  *  @brief Find the union of the keys in the given unordered_maps.
@@ -30,7 +38,7 @@ make_frequency(Iter it, Iter end);
  */
 template<typename T, typename U>
 std::unordered_set<T> union_keys(
-    const std::unordered_map<T, U>& map1, 
+    const std::unordered_map<T, U>& map1,
     const std::unordered_map<T, U>& map2
 );
 
@@ -74,6 +82,64 @@ std::string preprocess_string(const std::string& s);
  */
 double composite_similarity(const std::string& p_s1, const std::string& p_s2);
 
+/**
+ *  @brief Returns a vector of ngrams for a given string.
+ *  @param s The string.
+ *  @param chunk_length The length of each chunk.
+ *  @return A vector of ngrams for @p s each of length @p chunk_length.
+ */
+std::vector<std::string> get_ngrams(const std::string& s, size_t chunk_length = 3);
+
+// Overload to create a new unordered_map who has the sum of values of the keys
+// in the two parameters and return it. 
+template <typename T, typename U>
+std::unordered_map<T, U>
+operator+(
+    const std::unordered_map<T, U>& map1, 
+    const std::unordered_map<T, U>& map2
+) {
+    std::unordered_map<T, U> res;
+    
+    for (const auto& [k, v] : map1) {
+        res[k] += v;
+    }
+
+    for (const auto& [k, v] : map2) {
+        res[k] += v;
+    }
+
+    return res;
+}
+
+/**
+ *  @brief Extends an unordered_map with another one by summing values.
+ *  @param dest The map to be extended/added to/summed into.
+ *  @param src The map to be extended/summed from.
+ *  @return N/A, dest is modified in-place.
+ */
+template <typename T, typename U>
+void extend_map(
+    std::unordered_map<T, U>& dest, 
+    const std::unordered_map<T, U>& src
+) {
+// note: this also had to be in the header, weird!
+    for (const auto& [k, v] : src) {
+        dest[k] += v;
+    }
+}
+
+
+/**
+ *  @brief Calculates the frequency of the ngrams of a string.
+ *  @param s The string to calculate the frequency of.
+ *  @param chunk_length The length of each ngram.
+ *  @return The frequency of the ngrams of @p s of length @p chunk_length.
+ */
+std::unordered_map<std::string, size_t>
+make_ngram_freq(
+    const std::string& s, 
+    size_t chunk_length = 3);
+
 // Overload ostream for printing vector.
 template <typename T>
 std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec) {
@@ -83,6 +149,21 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec) {
         os << elem << ", ";
     }
     std::cout << ']';
+
+    os << std::endl;
+
+    return os;
+}
+
+// Overload ostream for printing dictionary.
+template <typename T, typename U>
+std::ostream& operator<<(std::ostream& os, const std::unordered_map<T, U>& map) {
+
+    std::cout << '{' << std::endl;
+    for (const auto& [k, v] : map) {
+        std::cout << k << ": " << v << ", " << std::endl;
+    }
+    std::cout << '}';
 
     os << std::endl;
 
