@@ -1,7 +1,9 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <vector>
 #include <Fuzzy.h>
+#include <TopElemsHeap.h>
 
 int main() {
     std::cout << "---------- FUZZY TEST ----------" << std::endl;
@@ -40,8 +42,55 @@ int main() {
     std::string t4_s1 = "Hello!";
     std::string t4_s2 = "";
     std::cout << "Levenshtein distance between '" << t4_s1 << "' and '" << t4_s2 << "': ";
-    std::cout << levenshtein_distance(t4_s1, t4_s2) << std::endl;
+    std::cout << levenshtein_distance(t4_s1, t4_s2) << std::endl << std::endl;
+
+    std::cout << "Composite similarity tests: " << std::endl << std::endl;
     
+    // Composite similarity - test one.
+    std::string t5_s1 = "data structures and algorithms";
+    std::string t5_s2 = "DATA STRUCTURES";
+    std::string t5_s3 = "dat structs and algos";
+    std::cout << "Composite similarity between '" << t5_s1 << "' and '"
+              << t5_s2 << "': ";
+    std::cout << std::setprecision(2) << std::fixed
+              << composite_similarity(t5_s1, t5_s2) * 100 << "% match"
+              << std::endl;
+    std::cout << "Composite similarity between '" << t5_s2 << "' and '"
+              << t5_s3 << "': ";
+    std::cout << std::setprecision(2) << std::fixed
+              << composite_similarity(t5_s2, t5_s3) * 100 << "% match"
+              << std::endl;
+    std::cout << "composite_similarity between '" << t5_s1 << "' and '"
+              << t5_s3 << "': ";
+    std::cout << std::setprecision(2) << std::fixed
+              << composite_similarity(t5_s1, t5_s3) * 100 << "% match"
+              << std::endl << std::endl;
+
+    std::cout << "Composite similarity - batch tests:" << std::endl << std::endl;
+    // Composite similarity - heap test.
+    std::string t6_query = "wring and rhetoic";
+    std::vector<std::string> t6_options = {
+        "Writing and Rhetoric",
+        "Advanced Writing and Rhetoric",
+        "Fundamentals of Computing",
+        "Data Structures",
+        "Systems Programming",
+        "Introduction to Philosophy",
+        "Intro to Fiction Writing",
+    };
+
+    std::cout << "Top three matches for '" << t6_query << "' in " << t6_options;
+    TopElemsHeap<Comparable<std::string>> t6_heap(3);
+    
+    for (const std::string& str : t6_options) {
+        t6_heap.push({composite_similarity(t6_query, str), str});
+    }
+
+    for (const Comparable<std::string>& comp : t6_heap.getElements()) {
+        std::cout << comp.data() << ' ' << std::setprecision(2)
+                  << comp.value() * 100 << "% match" << std::endl;
+    }
+
     std::cout << "-------- END FUZZY TEST --------" << std::endl;
     return 0;
 }

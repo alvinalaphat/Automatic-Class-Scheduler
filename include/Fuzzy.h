@@ -8,6 +8,7 @@
 #include <unordered_set>
 #include <iostream>
 #include <cmath>
+#include <algorithm>
 
 /**
  *  @brief Find the frequency of each element in a container.
@@ -30,7 +31,7 @@ make_frequency(Iter it, Iter end) {
  *  @brief Find the union of the keys in the given unordered_maps.
  *  @param map1 The first unordered_map.
  *  @param map2 The second unordered_map.
- *  @return A std::unordered_set with the union of the keys of @p map1 and @p map2.
+ *  @return A std::unordered_set with the union of the keys of @p map1 and @p map2 .
  */
 template<typename T, typename U>
 std::unordered_set<T> union_keys(
@@ -53,7 +54,7 @@ std::unordered_set<T> union_keys(
 /**
  *  @brief Calculate the magnitude of the values of an unordered_map.
  *  @param map The unordered_map.
- *  @return A double representing the magnitude of the @p map.
+ *  @return A double representing the magnitude of the @p map .
  */
 template<typename T>
 double map_magnitude(const std::unordered_map<T, size_t>& map) {
@@ -73,7 +74,7 @@ double map_magnitude(const std::unordered_map<T, size_t>& map) {
  *  @brief Calculates the cosine similarity between two strings.
  *  @param s1 The first string.
  *  @param s2 The second string.
- *  @return The cosine similarity between @p s1 and @p s2.
+ *  @return The cosine similarity between @p s1 and @p s2 .
  */
 double cosine_similarity(const std::string& s1, const std::string& s2) {
 
@@ -99,7 +100,7 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec) {
 
     std::cout << "[ ";
     for (const auto& elem : vec) {
-        os << elem << ' ';
+        os << elem << ", ";
     }
     std::cout << ']';
 
@@ -112,7 +113,7 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec) {
  *  @brief Calculates the levenshtein distance between two strings.
  *  @param s1 The first string.
  *  @param s2 The second string.
- *  @return The levenshtein distance between @p s1 and @p s2.
+ *  @return The levenshtein distance between @p s1 and @p s2 .
  */
 size_t levenshtein_distance(const std::string& s1, const std::string& s2) {
 
@@ -157,5 +158,61 @@ size_t levenshtein_distance(const std::string& s1, const std::string& s2) {
 
     return matrix.at(n).at(m);
 }
+
+/**
+ *  @brief Preprocesses string so that it compares easier to other strings.
+ *  @param s The string to preprocess.
+ *  @return The preprocessed form of @p s .
+ */
+std::string preprocess_string(const std::string& s) {
+
+    std::string res = s;
+
+    std::transform(res.begin(), res.end(), res.begin(),
+        [](unsigned char c){return std::tolower(c); });
+    
+    return res;
+}
+
+/**
+ *  @brief Calculates the similarity between two strings using a composition of
+ *         different algorithms.
+ *  @param s1 The first string.
+ *  @param s2 The second string.
+ *  @return The composite similarity between @p s1 and @p s2 .
+ */
+double composite_similarity(const std::string& p_s1, const std::string& p_s2) {
+
+    std::string s1 = preprocess_string(p_s1);
+    std::string s2 = preprocess_string(p_s2);
+
+    double cosine_sim = cosine_similarity(s1, s2);
+    double levenshtein_sim =
+        ((double)std::max(s1.size(), s2.size())
+        - (double)levenshtein_distance(s1, s2))
+        / (double)std::max(s1.size(), s2.size());
+    
+    return cosine_sim * levenshtein_sim;
+}
+
+// An object that compares by a double and not by its data.
+template <typename T>
+class Comparable {
+    double comp_;
+    T data_;
+public:
+    Comparable() : comp_(0), data_() {}
+    Comparable(const double& c, const T& d) : comp_(c), data_(d) {}
+
+    inline bool operator>(const Comparable& oth) const { return comp_ > oth.comp_; }
+    inline bool operator<(const Comparable& oth) const { return comp_ < oth.comp_; }
+    inline bool operator>=(const Comparable& oth) const { return comp_ >= oth.comp_; }
+    inline bool operator<=(const Comparable& oth) const { return comp_ <= oth.comp_; }
+    inline bool operator==(const Comparable& oth) const { return comp_ == oth.comp_; }
+    inline bool operator!=(const Comparable& oth) const { return not (comp_ == oth.comp_); }
+
+    inline double value() const { return comp_; }
+    inline T data() const { return data_; }
+};
 
 #endif /* FUZZY_H */
