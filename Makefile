@@ -12,10 +12,10 @@ CFLAGS := -O0 -g -Wall -Wextra -Wconversion -Wshadow -pedantic -Werror -I$(INC)
 CXXFLAGS := -m64 -std=c++2a -Weffc++ $(CFLAGS)
 
 # make all
-all: jsonTest CatalogueTest IntervalTest TopElemsHeapTest EventSchedulerTest 
+all: jsonTest CatalogueTest IntervalTest TopElemsHeapTest EventSchedulerTest FuzzyTest
 
 # general include dependencies
-DEPS := $(INC)/Interval.h $(INC)/Event.h $(INC)/EventScheduler.h $(INC)/TopElemsHeap.h $(INC)/json.h $(INC)/Catalogue.h
+DEPS := $(INC)/Interval.h $(INC)/Event.h $(INC)/EventScheduler.h $(INC)/TopElemsHeap.h $(INC)/json.h $(INC)/Catalogue.h $(INC)/Fuzzy.h
 
 # make JSONTest
 jsonTestObjs := $(OBJ)/jsonTest.o
@@ -60,6 +60,15 @@ TopElemsHeapTest: $(EXE)/TopElemsHeapTest
 	./$<
 
 $(EXE)/TopElemsHeapTest: $(TopElemsHeapTestObjs)
+	$(PP) $^ -o $@ $(CXXFLAGS)
+
+# make FuzzyTest
+FuzzyTestObjs := $(OBJ)/FuzzyTest.o
+
+FuzzyTest: $(EXE)/FuzzyTest
+	./$<
+
+$(EXE)/FuzzyTest: $(FuzzyTestObjs)
 	$(PP) $^ -o $@ $(CXXFLAGS)
 
 # general rule for making all object files
