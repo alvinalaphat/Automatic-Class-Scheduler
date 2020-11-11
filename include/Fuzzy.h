@@ -93,5 +93,69 @@ double cosine_similarity(const std::string& s1, const std::string& s2) {
     return res;
 }
 
+// Overload ostream for printing vector.
+template <typename T>
+std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec) {
+
+    std::cout << "[ ";
+    for (const auto& elem : vec) {
+        os << elem << ' ';
+    }
+    std::cout << ']';
+
+    os << std::endl;
+
+    return os;
+}
+
+/**
+ *  @brief Calculates the levenshtein distance between two strings.
+ *  @param s1 The first string.
+ *  @param s2 The second string.
+ *  @return The levenshtein distance between @p s1 and @p s2.
+ */
+size_t levenshtein_distance(const std::string& s1, const std::string& s2) {
+
+    size_t n = s1.size();
+    size_t m = s2.size();
+
+    if (n == 0) {
+        return m;
+    } else if (m == 0) {
+        return n;
+    }
+
+    std::vector<
+        std::vector<size_t>> matrix(n + 1, std::vector<size_t>(m + 1, 0));
+
+    for (size_t i = 0; i < m + 1; ++i) {
+        matrix.at(0).at(i) = i;
+    }
+
+    for (size_t i = 0; i < n + 1; ++i) {
+        matrix.at(i).at(0) = i;
+    }
+
+    for (size_t i = 1; i < n + 1; ++i) {
+        for (size_t j = 1; j < m + 1; ++j) {
+            
+            size_t cost = (s1[i - 1] == s2[j - 1]) ? 0 : 1;
+
+            matrix.at(i).at(j) = std::min(
+                matrix.at(i - 1).at(j) + 1,
+                std::min(
+                    matrix.at(i).at(j - 1) + 1,
+                    matrix.at(i - 1).at(j - 1) + cost
+                )
+            );
+        }
+    }
+
+#if 0 /* DEBUG */
+    std::cout << std::endl << matrix;
+#endif
+
+    return matrix.at(n).at(m);
+}
 
 #endif /* FUZZY_H */
