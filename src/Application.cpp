@@ -2,6 +2,8 @@
 #include <sstream>
 #include <Catalogue.h>
 #include <EventScheduler.h>
+#include <Fuzzy.h>
+#include <Comparable.h>
 
 int to_int(std::string input)
 {
@@ -28,11 +30,32 @@ int main()
   std::string ans;
 
   while (
-    std::cout << "Please enter a class id ('q' to finish adding): "
+    std::cout << "Please enter a class id ('q' to finish adding, 's' to search): "
     && std::cin >> ans
     && ans != "q"
   ) {
     
+    // show results if user wants to search
+    if (ans == "s") {
+      
+      std::cout << "Please enter the approx. name of the course: ";
+
+      std::cin.ignore(); // ignore newline after s
+
+      if (not std::getline(std::cin, ans)) {
+        break;
+      }
+
+      std::cout << "Top 10 results for '" << ans << "':" << std::endl;
+      std::cout << "ID/NAME" << std::endl;
+
+      for (const Comparable<Entry>& comp : cat.search(ans, 10)) {
+        std::cout << comp.data().id() << '/' << comp.data().name() << std::endl;
+      }
+
+      continue;
+    }
+
     // Parse integer id from user, 0 if invalid.
     int id = to_int(ans);
 

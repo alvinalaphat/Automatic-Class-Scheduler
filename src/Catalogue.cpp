@@ -20,7 +20,7 @@ Entry::Entry(int p_id, std::string p_name, Event p_event)
     : m_id(p_id), m_name(p_name), m_event(p_event) {}
 
 std::ostream& operator<<(std::ostream& os, const Entry& e) {
-	os << "Entry with id " << e.m_id << std::endl;
+	os << "Entry with id=" << e.m_id << std::endl;
 	os << "  Name is \"" << e.m_name << "\"" << std::endl;
 	e.m_event.display(std::cout, "  ");
 	return os;
