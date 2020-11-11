@@ -46,6 +46,17 @@ make_ngrams(
 );
 
 /**
+ * 
+ * 
+ * 
+ */
+std::unordered_map<std::string, size_t>
+make_ngram_freq(
+    const std::string& s,
+    size_t len = 3
+);
+
+/**
  *  @brief Combines maps using a given function.
  *  @param dest The unordered to change.
  *  @param src The unordered map to take from.

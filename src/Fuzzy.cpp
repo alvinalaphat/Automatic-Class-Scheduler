@@ -62,6 +62,16 @@ make_ngrams(
     return res;
 }
 
+std::unordered_map<std::string, size_t>
+make_ngram_freq(
+    const std::string& s,
+    size_t len
+) {
+
+    std::vector<std::string> ngrams = make_ngrams(s, len);
+    return make_freq(ngrams.begin(), ngrams.end());
+}
+
 double cosine_similarity(const std::string& s1, const std::string& s2) {
 
     std::unordered_map<char, size_t> f1 = make_freq(s1.begin(), s1.end());

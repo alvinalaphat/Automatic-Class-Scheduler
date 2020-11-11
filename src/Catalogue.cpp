@@ -11,6 +11,7 @@
 #include <Comparable.h>
 #include <algorithm>
 #include <cmath>
+#include <Fuzzy.h>
 
 /* ---------------------------------------------------------------------- */
 
@@ -29,16 +30,23 @@ std::ostream& operator<<(std::ostream& os, const Entry& e) {
 /* ---------------------------------------------------------------------- */
 
 Catalogue::Catalogue()
-	: m_entries(), mc_indiv_name_ngrams(), mc_compos_name_ngrams() {}
+	: m_entries(), mc_indiv_name_ngram_freq(), mc_compos_name_ngrams_freq() {}
 
 Catalogue::Catalogue(std::string json_filename)
-	: m_entries(), mc_indiv_name_ngrams(), mc_compos_name_ngrams()
+	: m_entries(), mc_indiv_name_ngram_freq(), mc_compos_name_ngrams_freq()
 {
 	if (load(json_filename) == EXIT_FAILURE) {
 		std::cerr << "Failure loading " << json_filename << "as catalogue!" << std::endl;
 	}
 }
 
+void Catalogue::cache(int id, const std::string& name) {
+
+	std::unordered_map<std::string, size_t>
+		indiv_ngrams = make_ngram_freq(name);
+	
+	mc_indiv_name_ngram_freq[id] = indiv_ngrams;
+}
 
 int Catalogue::load(std::string json_filename) {
 
@@ -80,7 +88,6 @@ int Catalogue::load(std::string json_filename) {
 	return EXIT_SUCCESS;
 }
 
-
 std::vector<int> Catalogue::ids() const {
 	std::vector<int> ret;
 	for (auto const& [id, entry] : m_entries) {
@@ -88,7 +95,6 @@ std::vector<int> Catalogue::ids() const {
 	}
 	return ret;
 }
-
 
 Entry Catalogue::get(int p_id) {
 	if (m_entries.find(p_id) == m_entries.end()) {
@@ -102,7 +108,6 @@ Entry Catalogue::get(int p_id) {
 Entry Catalogue::operator[](int p_id) {
 	return get(p_id);
 }
-
 
 std::ostream& operator<<(std::ostream& os, const Catalogue& cat) {
 	os << "Catalogue contains " << cat.size() << " entries." << std::endl;

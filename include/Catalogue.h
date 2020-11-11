@@ -40,6 +40,13 @@ private:
 class Catalogue
 {
 
+  /**
+   *  @brief Caches a name with id so that it can be searched for later.
+   *  @param id The id associated with the name.
+   *  @param name The name to cache.
+   */
+  void cache(int id, const std::string& name);
+
 public:
 
   Catalogue();
@@ -84,8 +91,8 @@ public:
 private:
 
   std::unordered_map<int, Entry> m_entries;
-  std::unordered_map<int, std::vector<std::string>> mc_indiv_name_ngrams;
-  std::unordered_map<std::string, size_t> mc_compos_name_ngrams;
+  std::unordered_map<int, std::unordered_map<std::string, size_t>> mc_indiv_name_ngram_freq;
+  std::unordered_map<std::string, size_t> mc_compos_name_ngrams_freq;
 
 };
 
