@@ -12,6 +12,9 @@
 #include "Catalogue.h"
 #include "TopElemsHeap.h"
 
+/* ------------------------------------------------------------ */
+/* General fuzzy section. */
+
 /**
  *  @brief Find the frequency of each element in a container.
  *  @param it Start of container to count.
@@ -169,5 +172,7 @@ std::ostream& operator<<(std::ostream& os, const std::unordered_map<T, U>& map) 
 
     return os;
 }
+
+/* ------------------------------------------------------------ */
 
 #endif /* FUZZY_H */

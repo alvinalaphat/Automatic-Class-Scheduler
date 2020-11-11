@@ -101,12 +101,12 @@ int main() {
 
     size_t t7_max_results = 10;
     Catalogue cat("data/nd_courses.json");
-    std::string t7_query = "FIRZT YR CHINSEE";
+    std::string t7_query = "MOREAU";
     std::vector<Comparable<Entry>> t7_results = cat.search(t7_query, t7_max_results);
 
     std::cout << "Top " << t7_max_results << " for '" << t7_query << "'" << std::endl;
     for (const auto& comp : t7_results) {
-        std::cout << comp.data().name() << ' ' << comp.value() << "% match" << std::endl;
+        std::cout << comp.data().name() << ' ' << comp.value() * 100 << "% match" << std::endl;
     }
 
 

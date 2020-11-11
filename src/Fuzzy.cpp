@@ -125,8 +125,9 @@ double composite_similarity(const std::string& p_s1, const std::string& p_s2) {
         ((double)std::max(s1.size(), s2.size())
             - (double)levenshtein_distance(s1, s2))
         / (double)std::max(s1.size(), s2.size());
+    double multiplier = (s2.find(s1) != std::string::npos) ? 2 : 1;
 
-    return cosine_sim * levenshtein_sim;
+    return std::min(1.0, cosine_sim * levenshtein_sim * multiplier);
 }
 
 std::vector<std::string> get_ngrams(const std::string& s, size_t chunk_length) {
