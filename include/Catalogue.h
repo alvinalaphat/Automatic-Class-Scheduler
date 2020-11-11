@@ -72,6 +72,8 @@ public:
 private:
 
   std::unordered_map<int, Entry> m_entries;
+  std::unordered_map<int, std::vector<std::string>> mc_indiv_name_ngrams;
+  std::unordered_map<std::string, size_t> mc_compos_name_ngrams;
 
 };
 

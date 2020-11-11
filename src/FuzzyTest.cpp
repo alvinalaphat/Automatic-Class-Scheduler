@@ -109,6 +109,13 @@ int main() {
         std::cout << comp.data().name() << ' ' << comp.value() * 100 << "% match" << std::endl;
     }
 
+    // Make ngrams - test.
+
+    std::cout << std::endl << "Ngram tests:" << std::endl << std::endl;
+    std::string t8_string = "this is a test";
+    std::cout << "3-letter Ngrams for '" << t8_string << "': ";
+    std::vector<std::string> t8_res = make_ngrams(t8_string);
+    std::cout << t8_res << std::endl;
 
     std::cout << "-------- END FUZZY TEST --------" << std::endl;
     return 0;

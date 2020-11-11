@@ -9,11 +9,11 @@
 #include <iostream>
 #include <cmath>
 #include <algorithm>
+#include <functional>
 #include "Catalogue.h"
 #include "TopElemsHeap.h"
 
 /* ------------------------------------------------------------ */
-/* General fuzzy section. */
 
 /**
  *  @brief Find the frequency of each element in a container.
@@ -23,7 +23,7 @@
  */
 template<typename Iter>
 std::unordered_map<typename std::iterator_traits<Iter>::value_type, size_t>
-make_frequency(Iter it, Iter end) {
+make_freq(Iter it, Iter end) {
     // note for later: this had to be in the header file to avoid ld errors, why?
     std::unordered_map<
         typename std::iterator_traits<Iter>::value_type, size_t> map;
@@ -31,6 +31,37 @@ make_frequency(Iter it, Iter end) {
         ++map[*it];
     }
     return map;
+}
+
+/**
+ *  @brief Makes ngrams of a given string.
+ *  @param s The string to make ngrams out of.
+ *  @param len The length of each ngram.
+ *  @return A vector of ngrams of @p s with length @p len .
+ */
+std::vector<std::string>
+make_ngrams(
+    const std::string& s,
+    size_t len = 3
+);
+
+/**
+ *  @brief Combines maps using a given function.
+ *  @param dest The unordered to change.
+ *  @param src The unordered map to take from.
+ *  @param func dest[k] = func(dest[k], src[k])
+ *  @return N/A, dest is modified in-place.
+ */
+template<typename T, typename U>
+void
+combine_maps(
+    std::unordered_map<T, U>& dest,
+    const std::unordered_map<T, U>& src,
+    std::function<U(U, U)> func
+) {
+    for (const auto& [k, _] : src) {
+        dest[k] = func(dest[k], src[k]);
+    }
 }
 
 /**

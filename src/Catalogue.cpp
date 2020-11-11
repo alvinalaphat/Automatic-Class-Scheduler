@@ -17,7 +17,7 @@
 Entry::Entry() : m_id(0), m_name(""), m_event() {}
 
 Entry::Entry(int p_id, std::string p_name, Event p_event)
-    : m_id(p_id), m_name(p_name), m_event(p_event) {}
+	: m_id(p_id), m_name(p_name), m_event(p_event) {}
 
 std::ostream& operator<<(std::ostream& os, const Entry& e) {
 	os << "Entry with id " << e.m_id << std::endl;
@@ -28,9 +28,12 @@ std::ostream& operator<<(std::ostream& os, const Entry& e) {
 
 /* ---------------------------------------------------------------------- */
 
-Catalogue::Catalogue() : m_entries() {}
+Catalogue::Catalogue()
+	: m_entries(), mc_indiv_name_ngrams(), mc_compos_name_ngrams() {}
 
-Catalogue::Catalogue(std::string json_filename) : m_entries() {
+Catalogue::Catalogue(std::string json_filename)
+	: m_entries(), mc_indiv_name_ngrams(), mc_compos_name_ngrams()
+{
 	if (load(json_filename) == EXIT_FAILURE) {
 		std::cerr << "Failure loading " << json_filename << "as catalogue!" << std::endl;
 	}
@@ -40,52 +43,41 @@ Catalogue::Catalogue(std::string json_filename) : m_entries() {
 int Catalogue::load(std::string json_filename) {
 
 	// read file into json if possible
-  std::ifstream file(json_filename);
+	std::ifstream file(json_filename);
 	if (not file.is_open()) {
 		return EXIT_FAILURE;
 	}
-  nlohmann::json js;
-  file >> js;
+	nlohmann::json js;
+	file >> js;
 
 	// loop through each entry
-  for (size_t i = 0; i < js.size(); ++i) {
+	for (size_t i = 0; i < js.size(); ++i) {
 
 		// prepare to build entry by preparing the parameters needed to construct it
-    int id = js.at(i).at("id").get<int>();
-    std::string name = js.at(i).at("name").get<std::string>();
+		int id = js.at(i).at("id").get<int>();
+		std::string name = js.at(i).at("name").get<std::string>();
 		std::vector<IntervalGroup> secs;
 
 		// parse interval groups to put into secs
-    for (size_t k = 0; k < js.at(i).at("times").size(); ++k) {
-			
-      std::vector<std::pair<double, double>> intervals;
-      
+		for (size_t k = 0; k < js.at(i).at("times").size(); ++k) {
+
+			std::vector<std::pair<double, double>> intervals;
+
 			// for each interval group, grab its times during the week
 			for (size_t a = 0; a < js.at(i).at("times").at(k).size(); ++a) {
-        intervals.push_back(
-            js.at(i).at("times").at(k).at(a).get<std::pair<double, double>>());
-      }
+				intervals.push_back(
+					js.at(i).at("times").at(k).at(a).get<std::pair<double, double>>());
+			}
 
-      secs.push_back(intervals);
+			secs.push_back(intervals);
 
-    }
+		}
 
 		// finally, construct it and add it to the entries map
-    m_entries[id] = {id, name, secs};
-  }
-
-#if 0 /* Catalogue::load debug. */
-
-	std::cout << "----------" << std::endl;
-  std::cout << "Catalogue read " << entries.size() << " entries." << std::endl;
-	for (auto const& [id, entry] : entries) {
-		std::cout << entry;
+		m_entries[id] = { id, name, secs };
 	}
-	std::cout << "----------" << std::endl;
 
-#endif /* Catalogue::load debug. */
-
-      return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 }
 
 
@@ -101,7 +93,8 @@ std::vector<int> Catalogue::ids() const {
 Entry Catalogue::get(int p_id) {
 	if (m_entries.find(p_id) == m_entries.end()) {
 		return {};
-	} else {
+	}
+	else {
 		return m_entries[p_id];
 	}
 }
@@ -132,7 +125,7 @@ Catalogue::search(
 
 	TopElemsHeap<Comparable<Entry>> heap(max_results);
 	for (const auto& [id, entry] : m_entries) {
-		heap.push({composite_similarity(name, entry.name()), entry});
+		heap.push({ composite_similarity(name, entry.name()), entry });
 	}
 	return heap.getElements();
 }

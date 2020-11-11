@@ -42,10 +42,30 @@ double map_magnitude(const std::unordered_map<T, size_t>& map) {
     return res;
 }
 
+std::vector<std::string>
+make_ngrams(
+    const std::string& p_s,
+    size_t len
+) {
+
+    if (p_s.size() + 2 < len) {
+        return {};
+    }
+
+    const std::string s = " " + p_s + " ";
+    std::vector<std::string> res;
+
+    for (size_t i = 0; i + len <= s.size(); ++i) {
+        res.push_back(s.substr(i, len));
+    }
+
+    return res;
+}
+
 double cosine_similarity(const std::string& s1, const std::string& s2) {
 
-    std::unordered_map<char, size_t> f1 = make_frequency(s1.begin(), s1.end());
-    std::unordered_map<char, size_t> f2 = make_frequency(s2.begin(), s2.end());
+    std::unordered_map<char, size_t> f1 = make_freq(s1.begin(), s1.end());
+    std::unordered_map<char, size_t> f2 = make_freq(s2.begin(), s2.end());
     std::unordered_set<char> distinct = union_keys(f1, f2);
 
     double res = 0;
