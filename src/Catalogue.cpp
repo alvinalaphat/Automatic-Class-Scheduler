@@ -30,10 +30,10 @@ std::ostream& operator<<(std::ostream& os, const Entry& e) {
 /* ---------------------------------------------------------------------- */
 
 Catalogue::Catalogue()
-	: m_entries(), mc_indiv_name_ngram_freq(), mc_compos_name_ngrams_freq() {}
+	: m_entries(), mc_indiv_name_ngram_freq(), mc_compos_name_ngram_freq() {}
 
 Catalogue::Catalogue(std::string json_filename)
-	: m_entries(), mc_indiv_name_ngram_freq(), mc_compos_name_ngrams_freq()
+	: m_entries(), mc_indiv_name_ngram_freq(), mc_compos_name_ngram_freq()
 {
 	if (load(json_filename) == EXIT_FAILURE) {
 		std::cerr << "Failure loading " << json_filename << "as catalogue!" << std::endl;
@@ -44,8 +44,30 @@ void Catalogue::cache(int id, const std::string& name) {
 
 	std::unordered_map<std::string, size_t>
 		indiv_ngrams = make_ngram_freq(name);
-	
+
 	mc_indiv_name_ngram_freq[id] = indiv_ngrams;
+
+	combine_occ_maps(mc_compos_name_ngram_freq, indiv_ngrams);
+}
+
+double Catalogue::tfidf(
+	const std::unordered_map<std::string, size_t>& indiv,
+	const std::unordered_map<std::string, size_t>& other
+) {
+	double res = 0;
+
+	for (const auto& [ngram, _] : indiv) {
+
+		double tf = (other.find(ngram) != other.end()) ? (double)other.find(ngram)->second : 0;
+
+		double idf = std::log(
+			(double)m_entries.size()
+			/ (double)(1 + mc_compos_name_ngram_freq[ngram]));
+
+		res += tf * idf;
+	}
+
+	return res;
 }
 
 int Catalogue::load(std::string json_filename) {
@@ -64,6 +86,7 @@ int Catalogue::load(std::string json_filename) {
 		// prepare to build entry by preparing the parameters needed to construct it
 		int id = js.at(i).at("id").get<int>();
 		std::string name = js.at(i).at("name").get<std::string>();
+		cache(id, name); // so we can search later
 		std::vector<IntervalGroup> secs;
 
 		// parse interval groups to put into secs
@@ -89,6 +112,7 @@ int Catalogue::load(std::string json_filename) {
 }
 
 std::vector<int> Catalogue::ids() const {
+
 	std::vector<int> ret;
 	for (auto const& [id, entry] : m_entries) {
 		ret.push_back(id);
@@ -97,6 +121,7 @@ std::vector<int> Catalogue::ids() const {
 }
 
 Entry Catalogue::get(int p_id) {
+
 	if (m_entries.find(p_id) == m_entries.end()) {
 		return {};
 	}
@@ -105,11 +130,8 @@ Entry Catalogue::get(int p_id) {
 	}
 }
 
-Entry Catalogue::operator[](int p_id) {
-	return get(p_id);
-}
-
 std::ostream& operator<<(std::ostream& os, const Catalogue& cat) {
+
 	os << "Catalogue contains " << cat.size() << " entries." << std::endl;
 	os << "Ids are:" << std::endl;
 	for (auto const& id : cat.ids()) {
@@ -126,11 +148,18 @@ std::vector<Comparable<Entry>>
 Catalogue::search(
 	const std::string& name,
 	size_t max_results
-) const {
+) {
 
 	TopElemsHeap<Comparable<Entry>> heap(max_results);
+#if 0 /* old composite */
 	for (const auto& [id, entry] : m_entries) {
 		heap.push({ composite_similarity(name, entry.name()), entry });
 	}
+#else /* new tfidf */
+	std::unordered_map<std::string, size_t> ngram_freq = make_ngram_freq(name);
+	for (const auto& [id, entry] : m_entries) {
+		heap.push({ tfidf(ngram_freq, mc_indiv_name_ngram_freq[id]), entry });
+	}
+#endif
 	return heap.getElements();
 }

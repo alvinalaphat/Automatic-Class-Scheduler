@@ -47,6 +47,16 @@ class Catalogue
    */
   void cache(int id, const std::string& name);
 
+  /**
+   * 
+   * 
+   * 
+   */
+  double tfidf(
+    const std::unordered_map<std::string, size_t>& indiv,
+    const std::unordered_map<std::string, size_t>& other
+  );
+
 public:
 
   Catalogue();
@@ -78,7 +88,7 @@ public:
 
   // Both attempt to get Entry with given id, return empty Entry on failure.
   Entry get(int p_id);
-  Entry operator[](int p_id);
+  inline Entry operator[](int p_id) { return get(p_id); };
 
   // Returns TRUE if id exists in entries, else FALSE.
   inline bool has(int p_id) const { return m_entries.find(p_id) != m_entries.end(); }
@@ -86,13 +96,13 @@ public:
   friend std::ostream& operator<<(std::ostream&, const Catalogue&);
 
   // Returns a vector of entries that are similar to name of class.
-  std::vector<Comparable<Entry>> search(const std::string& name, size_t max_results) const;
+  std::vector<Comparable<Entry>> search(const std::string& name, size_t max_results);
 
 private:
 
   std::unordered_map<int, Entry> m_entries;
   std::unordered_map<int, std::unordered_map<std::string, size_t>> mc_indiv_name_ngram_freq;
-  std::unordered_map<std::string, size_t> mc_compos_name_ngrams_freq;
+  std::unordered_map<std::string, size_t> mc_compos_name_ngram_freq;
 
 };
 

@@ -101,7 +101,7 @@ int main() {
 
     size_t t7_max_results = 10;
     Catalogue cat("data/nd_courses.json");
-    std::string t7_query = "MOREAU first year exprience";
+    std::string t7_query = "this is a test";
     std::vector<Comparable<Entry>> t7_results = cat.search(t7_query, t7_max_results);
 
     std::cout << "Top " << t7_max_results << " for '" << t7_query << "'" << std::endl;
@@ -116,7 +116,7 @@ int main() {
     std::cout << "3-letter Ngrams for '" << t8_string << "': ";
     std::vector<std::string> t8_res = make_ngrams(t8_string);
     std::cout << t8_res << std::endl;
-
+    
     std::cout << "-------- END FUZZY TEST --------" << std::endl;
     return 0;
 }

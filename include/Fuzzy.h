@@ -57,22 +57,43 @@ make_ngram_freq(
 );
 
 /**
- *  @brief Combines maps using a given function.
+ *  @brief Combines maps by summing values.
  *  @param dest The unordered to change.
  *  @param src The unordered map to take from.
- *  @param func dest[k] = func(dest[k], src[k])
  *  @return N/A, dest is modified in-place.
  */
 template<typename T, typename U>
 void
-combine_maps(
+sum_maps(
     std::unordered_map<T, U>& dest,
-    const std::unordered_map<T, U>& src,
-    std::function<U(U, U)> func
+    const std::unordered_map<T, U>& p_src
 ) {
+
+    std::unordered_map<T, U> src = p_src;
     for (const auto& [k, _] : src) {
-        dest[k] = func(dest[k], src[k]);
+        dest[k] += src[k];
     }
+}
+
+/**
+ *  @brief Combines maps by addings occurrences.
+ *  @param dest The unordered to change.
+ *  @param p_src The unordered map to take from.
+ *  @return N/A, dest is modified in-place.
+ */
+template<typename T, typename U>
+void
+combine_occ_maps(
+    std::unordered_map<T, U>& dest,
+    const std::unordered_map<T, U>& p_src
+) {
+    std::unordered_map<T, size_t> src;
+
+    for (const auto& [k, _] : p_src) {
+        ++src[k];
+    }
+
+    sum_maps(dest, src);
 }
 
 /**
