@@ -4,6 +4,7 @@
 #include <vector>
 #include <Fuzzy.h>
 #include <TopElemsHeap.h>
+#include <Catalogue.h>
 
 int main() {
     std::cout << "---------- FUZZY TEST ----------" << std::endl;
@@ -67,7 +68,9 @@ int main() {
               << std::endl << std::endl;
 
     std::cout << "Composite similarity - batch tests:" << std::endl << std::endl;
+
     // Composite similarity - heap test.
+
     std::string t6_query = "wring and rhetoic";
     std::vector<std::string> t6_options = {
         "Writing and Rhetoric",
@@ -89,6 +92,21 @@ int main() {
     for (const Comparable<std::string>& comp : t6_heap.getElements()) {
         std::cout << comp.data() << ' ' << std::setprecision(2)
                   << comp.value() * 100 << "% match" << std::endl;
+    }
+
+
+    std::cout << "Catalogue - 'Did you mean?' tests." << std::endl << std::endl;
+
+    // Search catalogue - test.
+
+    size_t t7_max_results = 10;
+    Catalogue cat("data/nd_courses.json");
+    std::string t7_query = "first year";
+    std::vector<Comparable<Entry>> t7_results = cat.search(t7_query, t7_max_results);
+
+    std::cout << "Top " << t7_max_results << " for '" << t7_query << "'" << std::endl;
+    for (const auto& comp : t7_results) {
+        std::cout << comp.data().name() << ' ' << comp.value() << "% match" << std::endl;
     }
 
     std::cout << "-------- END FUZZY TEST --------" << std::endl;

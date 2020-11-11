@@ -67,7 +67,7 @@ public:
   friend std::ostream& operator<<(std::ostream&, const Catalogue&);
 
   // Returns a vector of entries that are similar to name of class.
-  std::vector<Comparable<Entry>> search(const std::string& name) const;
+  std::vector<Comparable<Entry>> search(const std::string& name, size_t max_results) const;
 
 private:
 

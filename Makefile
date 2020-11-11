@@ -63,7 +63,7 @@ $(EXE)/TopElemsHeapTest: $(TopElemsHeapTestObjs)
 	$(PP) $^ -o $@ $(CXXFLAGS)
 
 # make FuzzyTest
-FuzzyTestObjs := $(OBJ)/FuzzyTest.o $(OBJ)/Fuzzy.o
+FuzzyTestObjs := $(OBJ)/FuzzyTest.o $(OBJ)/Catalogue.o $(OBJ)/Interval.o $(OBJ)/Event.o $(OBJ)/Fuzzy.o
 
 FuzzyTest: $(EXE)/FuzzyTest
 	./$<

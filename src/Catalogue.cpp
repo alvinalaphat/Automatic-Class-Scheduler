@@ -9,6 +9,7 @@
 #include <vector>
 #include <TopElemsHeap.h>
 #include <Comparable.h>
+#include <algorithm>
 
 /* ---------------------------------------------------------------------- */
 
@@ -29,7 +30,7 @@ std::ostream& operator<<(std::ostream& os, const Entry& e) {
 Catalogue::Catalogue() : m_entries() {}
 
 Catalogue::Catalogue(std::string json_filename) : m_entries() {
-	if (not load(json_filename)) {
+	if (load(json_filename) == EXIT_FAILURE) {
 		std::cerr << "Failure loading " << json_filename << "as catalogue!" << std::endl;
 	}
 }
@@ -123,11 +124,12 @@ std::ostream& operator<<(std::ostream& os, const Catalogue& cat) {
 }
 
 
-std::vector<Comparable<Entry>> Catalogue::search(const std::string& name) const {
-	const size_t max_results = 10;
+std::vector<Comparable<Entry>> Catalogue::search(const std::string& name, size_t max_results) const {
 	TopElemsHeap<Comparable<Entry>> heap(max_results);
 	for (const auto& [id, entry] : m_entries) {
 		heap.push({composite_similarity(name, entry.name()), entry});
 	}
+	std::vector<Comparable<Entry>> result = heap.getElements();
+	std::sort(result.begin(), result.end());
 	return heap.getElements();
 }
