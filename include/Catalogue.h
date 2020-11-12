@@ -17,19 +17,26 @@ class Entry
 public:
 
   Entry();
-  Entry(int p_id, std::string p_name, Event p_event);
+  Entry(
+    size_t p_id,
+    std::string p_name,
+    Event p_event,
+    std::unordered_map<std::string, std::vector<std::string>> p_tags);
 
-  inline int id() const { return m_id; }
-  inline std::string name() const { return m_name; }
-  inline Event event() const { return m_event; }
+  inline size_t id() const { return m_id; }
+  inline const std::string& name() const { return m_name; }
+  inline const Event& event() const { return m_event; }
+  inline const std::unordered_map<
+    std::string, std::vector<std::string>>&tags() const { return m_tags; }
 
   friend std::ostream& operator<<(std::ostream&, const Entry&);
 
 private:
 
-  int m_id;
+  size_t m_id;
   std::string m_name;
   Event m_event;
+  std::unordered_map<std::string, std::vector<std::string>> m_tags;
 
 };
 
@@ -53,20 +60,19 @@ public:
   inline size_t size() const { return m_entries.size(); }
 
   // Returns all ids in catalogue.
-  std::vector<int> ids() const;
+  std::vector<size_t> ids() const;
 
   // Both attempt to get Entry with given id, return empty Entry on failure.
-  Entry get(int p_id);
-  Entry operator[](int p_id);
+  const Entry& at(size_t p_id);
 
   // Returns TRUE if id exists in entries, else FALSE.
-  inline bool has(int p_id) const { return m_entries.find(p_id) != m_entries.end(); }
-  
+  inline bool has(size_t p_id) const { return m_entries.find(p_id) != m_entries.end(); }
+
   friend std::ostream& operator<<(std::ostream&, const Catalogue&);
 
 private:
 
-  std::unordered_map<int, Entry> m_entries;
+  std::unordered_map<size_t, Entry> m_entries;
 
 };
 
