@@ -4,6 +4,7 @@
 #include <EventScheduler.h>
 #include <Fuzzy.h>
 #include <Comparable.h>
+#include <iomanip>
 
 int to_int(std::string input)
 {
@@ -25,12 +26,12 @@ int main()
 
   std::cout << "There are " << cat.size() << " classes available for selection." << std::endl;
 
-  // Take and parse user selection and add to scheduler.
+  // Take and parse user selection and add to vector.
   EventScheduler sched;
   std::string ans;
 
   while (
-    std::cout << "Please enter a class id ('q' to finish adding, 's' to search): "
+    std::cout << "Please enter a class id ('q' to finish adding, 's' to search, 'l' to list): "
     && std::cin >> ans
     && ans != "q"
   ) {
@@ -46,12 +47,26 @@ int main()
         break;
       }
 
-      std::cout << "Top 10 results for '" << ans << "':" << std::endl;
-      std::cout << "ID/NAME" << std::endl;
+      auto res = cat.search(ans, 10);
 
-      for (const Comparable<Entry>& comp : cat.search(ans, 10)) {
-        std::cout << comp.data().id() << '/' << comp.data().name() << std::endl;
+      std::cout << "Showing " << res.size() << " results for '" << ans << "':" << std::endl;
+      std::cout << std::setw(16) << "ID" 
+                << std::setw(48) << "NAME"
+                << std::setw(16) << "SIMILARITY" << std::endl;
+
+      for (const Comparable<Entry>& comp : res) {
+        std::cout << std::setw(16) << comp.data().id()
+                  << std::setw(48) << comp.data().name()
+                  << std::setw(16) << comp.value() << std::endl;
       }
+
+      continue;
+    }
+
+    // show current classes
+    if (ans == "l") {
+
+      sched.display(std::cout);
 
       continue;
     }
@@ -80,7 +95,7 @@ int main()
     }
 
     // Parse integer priority from user, skip to next entry if invalid.
-    std::cout << "Please enter a priority (integer value): ";
+    std::cout << "Please enter a priority (integer value, higher is more preferred): ";
 
     if (not (std::cin >> ans)) {
       break;
@@ -103,12 +118,21 @@ int main()
   }
 
   // Build optimal schedule and print it out!
-  std::cout << "------ BUILDING SCHEDULE -----" << std::endl;
   auto opt = sched.buildOptimalSchedule();
 
-  std::cout << "---------- SCHEDULE ----------" << std::endl;
-  for (auto event: opt) {
-    std::cout << "Event id #" << event.first << ", Section " << event.second << std::endl;
+  std::cout << "-------------------------------------------------" << std::endl;
+  std::cout << std::setw(12) << "ID" << std::setw(36) << "NAME"
+            << std::setw(24) << "SECTION TIMES" << std::endl;
+    
+  for (auto res: opt) {
+
+    // print event in a pretty way
+    Entry ent = cat.get(res.first);
+    IntervalGroup section = ent.event().getSection(res.second);
+    
+    std::cout << std::setw(12) << ent.id()
+              << std::setw(36) << ent.name()
+              << std::setw(24) << section << std::endl;
   }
   
 

@@ -9,6 +9,9 @@
 int main() {
     std::cout << "---------- FUZZY TEST ----------" << std::endl;
 
+
+
+
     std::cout << "Cosine similarity tests:" << std::endl << std::endl;
 
     // Cosine similarity - test one.
@@ -24,6 +27,9 @@ int main() {
     std::cout << "Cosine similarity of '" << t1_s1 << "' and '" << t1_s2 << "': ";
     std::cout << std::setprecision(8) << std::fixed
         << cosine_similarity(t1_s1, t1_s2) << std::endl << std::endl;
+
+
+
 
     std::cout << "Levenshtein distance tests: " << std::endl << std::endl;
 
@@ -45,9 +51,12 @@ int main() {
     std::cout << "Levenshtein distance between '" << t4_s1 << "' and '" << t4_s2 << "': ";
     std::cout << levenshtein_distance(t4_s1, t4_s2) << std::endl << std::endl;
 
-    std::cout << "Composite similarity tests: " << std::endl << std::endl;
+
 
     // Composite similarity - test one.
+
+    std::cout << "Composite similarity tests: " << std::endl << std::endl;
+
     std::string t5_s1 = "data structures and algorithms";
     std::string t5_s2 = "DATA STRUCTURES";
     std::string t5_s3 = "dat structs and algos";
@@ -67,9 +76,11 @@ int main() {
         << composite_similarity(t5_s1, t5_s3) * 100 << "% match"
         << std::endl << std::endl;
 
-    std::cout << "Composite similarity - batch tests:" << std::endl << std::endl;
+
 
     // Composite similarity - heap test.
+
+    std::cout << "Composite similarity - batch tests:" << std::endl << std::endl;
 
     std::string t6_query = "wring and rhetoic";
     std::vector<std::string> t6_options = {
@@ -95,20 +106,24 @@ int main() {
     }
 
 
-    std::cout << "Catalogue - 'Did you mean?' tests." << std::endl << std::endl;
 
-    // Search catalogue - test.
+    // Search catalogue with tf-idf - test.
+    std::cout << std::endl << "Catalogue - 'Did you mean?' tests with TF-IDF"
+              << std::endl << std::endl;
 
-    size_t t7_max_results = 10;
+    size_t t7_max_results = 100;
     Catalogue cat("data/nd_courses.json");
-    std::string t7_query = "MOREAU first year exprience";
+    std::string t7_query = "PLEASE. give me anything. I need to sign up for a class right now or else "
+    "I get evicted from the premises. I need anything. actually, I only want something with COMPUTERS."
+    "maybe something about about SYSTEMS. SYSTEMS PROGRAMMING?";
     std::vector<Comparable<Entry>> t7_results = cat.search(t7_query, t7_max_results);
 
     std::cout << "Top " << t7_max_results << " for '" << t7_query << "'" << std::endl;
     for (const auto& comp : t7_results) {
-        std::cout << comp.data().name() << ' ' << comp.value() * 100 << "% match" << std::endl;
+        std::cout << std::setw(10) << comp.data().id() << "\t" << std::setw(30)
+                  << comp.data().name() << "\t\t" << comp.value() << " closeness" 
+                  << std::endl;
     }
-
 
     std::cout << "-------- END FUZZY TEST --------" << std::endl;
     return 0;

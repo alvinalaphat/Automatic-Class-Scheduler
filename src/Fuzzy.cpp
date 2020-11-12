@@ -29,23 +29,50 @@ std::unordered_set<T> union_keys(
 }
 
 template<typename T>
-double map_magnitude(const std::unordered_map<T, size_t>& map) {
-
+double map_magnitude(const std::unordered_map<T, size_t>& map)
+{
     double res = 0;
 
+    // square each value
     for (const auto& [a, b] : map) {
         res += (double)(b * b);
     }
 
+    // sqrt to get magnitude
     res = std::sqrt(res);
 
     return res;
 }
 
+std::vector<std::string>
+make_ngrams(
+    const std::string& p_s,
+    size_t len
+) {
+    const std::string s = " " + p_s + " ";
+    std::vector<std::string> res;
+
+    for (size_t i = 0; i + len <= s.size(); ++i) {
+        res.push_back(s.substr(i, len));
+    }
+
+    return res;
+}
+
+std::unordered_map<std::string, size_t>
+make_ngram_freq(
+    const std::string& s,
+    size_t len
+) {
+
+    std::vector<std::string> ngrams = make_ngrams(s, len);
+    return make_freq(ngrams.begin(), ngrams.end());
+}
+
 double cosine_similarity(const std::string& s1, const std::string& s2) {
 
-    std::unordered_map<char, size_t> f1 = make_frequency(s1.begin(), s1.end());
-    std::unordered_map<char, size_t> f2 = make_frequency(s2.begin(), s2.end());
+    std::unordered_map<char, size_t> f1 = make_freq(s1.begin(), s1.end());
+    std::unordered_map<char, size_t> f2 = make_freq(s2.begin(), s2.end());
     std::unordered_set<char> distinct = union_keys(f1, f2);
 
     double res = 0;
@@ -105,10 +132,11 @@ size_t levenshtein_distance(const std::string& s1, const std::string& s2) {
     return matrix.at(n).at(m);
 }
 
-std::string preprocess_string(const std::string& s) {
-
+std::string preprocess_string(const std::string& s)
+{
     std::string res = s;
 
+    // lowercase string
     std::transform(res.begin(), res.end(), res.begin(),
         [](unsigned char c) {return std::tolower(c); });
 
@@ -123,7 +151,7 @@ double composite_similarity(const std::string& p_s1, const std::string& p_s2) {
     double cosine_sim = cosine_similarity(s1, s2);
     double levenshtein_sim =
         ((double)std::max(s1.size(), s2.size())
-            - (double)levenshtein_distance(s1, s2))
+        - (double)levenshtein_distance(s1, s2))
         / (double)std::max(s1.size(), s2.size());
 
     return cosine_sim * levenshtein_sim;
