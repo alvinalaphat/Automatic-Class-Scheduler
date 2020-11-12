@@ -1,6 +1,7 @@
 
 import requests
 from bs4 import BeautifulSoup
+from collections import defaultdict
 import json
 import argparse
 import sys
@@ -367,9 +368,14 @@ def convertCourses(courses):
             converted[courseID] = {
                 "id" : courseID,
                 "name" : course['title'],
-                "times" : []
+                "times" : [],
+                "tags": defaultdict(list),
             }
         
+        # instructor
+        # department
+        # crns
+
         # convert times into the format of minutes since midnight of Monday
         # morning
         convertedTimes = []
@@ -382,7 +388,16 @@ def convertCourses(courses):
             ])
 
         converted[courseID]['times'].append(convertedTimes)
-    
+
+        # add in instructors/crns/... per-section data as for example...
+        # {instructor: ["hey", "hoo", "hoya"...]} for each section
+        # each section maps to index in value in tags
+        converted[courseID]['tags']['department'].append(course['department'])
+        converted[courseID]['tags']['instructor'].append(course['instructor'])
+        converted[courseID]['tags']['crn'].append(str(course['crn']))
+        converted[courseID]['tags']['location'].append(course['location'])
+        converted[courseID]['tags']['section'].append(str(course['section']))
+
     converted = list(converted.values())
     return converted
 
@@ -393,6 +408,7 @@ args = parser.parse_args()
 
 # scrape the courses and write them to the specified output file
 courses = getAllCourses(progressMessages=True)
+print(courses)
 converted = convertCourses(courses)
 with open(args.file, 'w') as fp:
     json.dump(converted, fp, indent=4)
