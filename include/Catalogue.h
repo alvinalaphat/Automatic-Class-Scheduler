@@ -57,6 +57,13 @@ class Catalogue
     const std::unordered_map<std::string, size_t>& other
   );
 
+  /**
+   * 
+   * 
+   * 
+   */
+  void add_entry(Entry ent);
+
 public:
 
   Catalogue();
@@ -96,13 +103,16 @@ public:
   friend std::ostream& operator<<(std::ostream&, const Catalogue&);
 
   // Returns a vector of entries that are similar to name of class.
-  std::vector<Comparable<Entry>> search(const std::string& name, size_t max_results);
+  std::vector<Comparable<Entry>> search(
+    const std::string& name,
+    size_t max_results,
+    double threshold = 1.0);
 
 private:
 
   std::unordered_map<int, Entry> m_entries;
-  std::unordered_map<int, std::unordered_map<std::string, size_t>> mc_indiv_name_ngram_freq;
-  std::unordered_map<std::string, size_t> mc_compos_name_ngram_freq;
+  std::unordered_map<int, std::unordered_map<std::string, size_t>> m_indiv_cache;
+  std::unordered_map<std::string, size_t> m_compos_cache;
 
 };
 

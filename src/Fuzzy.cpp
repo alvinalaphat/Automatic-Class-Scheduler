@@ -29,14 +29,16 @@ std::unordered_set<T> union_keys(
 }
 
 template<typename T>
-double map_magnitude(const std::unordered_map<T, size_t>& map) {
-
+double map_magnitude(const std::unordered_map<T, size_t>& map)
+{
     double res = 0;
 
+    // square each value
     for (const auto& [a, b] : map) {
         res += (double)(b * b);
     }
 
+    // sqrt to get magnitude
     res = std::sqrt(res);
 
     return res;
@@ -47,11 +49,6 @@ make_ngrams(
     const std::string& p_s,
     size_t len
 ) {
-
-    if (p_s.size() + 2 < len) {
-        return {};
-    }
-
     const std::string s = " " + p_s + " ";
     std::vector<std::string> res;
 
@@ -135,10 +132,11 @@ size_t levenshtein_distance(const std::string& s1, const std::string& s2) {
     return matrix.at(n).at(m);
 }
 
-std::string preprocess_string(const std::string& s) {
-
+std::string preprocess_string(const std::string& s)
+{
     std::string res = s;
 
+    // lowercase string
     std::transform(res.begin(), res.end(), res.begin(),
         [](unsigned char c) {return std::tolower(c); });
 
@@ -153,7 +151,7 @@ double composite_similarity(const std::string& p_s1, const std::string& p_s2) {
     double cosine_sim = cosine_similarity(s1, s2);
     double levenshtein_sim =
         ((double)std::max(s1.size(), s2.size())
-            - (double)levenshtein_distance(s1, s2))
+        - (double)levenshtein_distance(s1, s2))
         / (double)std::max(s1.size(), s2.size());
 
     return cosine_sim * levenshtein_sim;
