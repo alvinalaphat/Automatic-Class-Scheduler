@@ -1,4 +1,4 @@
-nclude <Catalogue.h>
+#include <Catalogue.h>
 #include <Event.h>
 #include <Interval.h>
 #include <fstream>
@@ -8,11 +8,9 @@ nclude <Catalogue.h>
 #include <utility>
 #include <vector>
 #include <TopElemsHeap.h>
-#include <Comparable.h>
 #include <math.h>
 #include <algorithm>
 #include <cmath>
-#include <Fuzzy.h>
 
 /* ---------------------------------------------------------------------- */
 
