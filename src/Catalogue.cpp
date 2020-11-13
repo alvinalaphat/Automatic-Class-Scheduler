@@ -11,7 +11,6 @@
 #include <Comparable.h>
 #include <algorithm>
 #include <cmath>
-#include <Fuzzy.h>
 
 /* ---------------------------------------------------------------------- */
 
@@ -144,8 +143,6 @@ int Catalogue::load(std::string json_filename)
 	return EXIT_SUCCESS;
 }
 
-
-
 std::vector<int> Catalogue::ids() const
 {
 	// basically python's dict().keys()
@@ -167,51 +164,6 @@ Entry Catalogue::get(int p_id)
 		return m_entries[p_id];
 	}
 }
-
-
-
-std::vector<Comparable<Entry>>
-Catalogue::search(
-	const std::string& name,
-	size_t max_results,
-	double threshold
-) {
-	// lowercase string
-	std::string nname = preprocess_string(name);
-
-	// create heap to keep track of best matches
-	TopElemsHeap<Comparable<Entry>> heap(max_results);
-
-#if 0 /* old composite */
-	for (const auto& [id, entry] : m_entries) {
-		heap.push({ composite_similarity(name, entry.name()), entry });
-	}
-#else /* new tfidf */
-
-	// create frequency of ngrams of string being matched
-	std::unordered_map<std::string, size_t> ngram_freq = make_ngram_freq(nname);
-	for (const auto& [id, entry] : m_entries) {
-
-		// create comparable so we can check if it is above threshold match
-		Comparable<Entry> cand = {tfidf(ngram_freq, m_indiv_cache[id]), entry};
-		
-		// discard if not close enough match
-		if (cand.value() < threshold) {
-			continue;
-		}
-
-		heap.push(cand);
-	}
-
-#endif /* end */
-
-	// returns sorted vector of comparables, higher matches first
-	auto res = heap.getElements();
-	std::sort(res.rbegin(), res.rend());
-	return res;
-}
-
-
 
 std::ostream& operator<<(std::ostream& os, const Catalogue& cat)
 {

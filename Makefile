@@ -12,7 +12,7 @@ CFLAGS := -O0 -g -Wall -Wextra -Wconversion -Wshadow -pedantic -Werror -I$(INC)
 CXXFLAGS := -m64 -std=c++2a -Weffc++ $(CFLAGS)
 
 # make all
-all: jsonTest CatalogueTest IntervalTest TopElemsHeapTest EventSchedulerTest FuzzyTest
+all: jsonTest CatalogueTest IntervalTest TopElemsHeapTest EventSchedulerTest SearchEngineTest
 
 # general include dependencies
 DEPS := $(INC)/Interval.h $(INC)/Event.h $(INC)/EventScheduler.h $(INC)/TopElemsHeap.h $(INC)/json.h $(INC)/Catalogue.h $(INC)/Fuzzy.h
@@ -62,13 +62,13 @@ TopElemsHeapTest: $(EXE)/TopElemsHeapTest
 $(EXE)/TopElemsHeapTest: $(TopElemsHeapTestObjs)
 	$(PP) $^ -o $@ $(CXXFLAGS)
 
-# make FuzzyTest
-FuzzyTestObjs := $(OBJ)/FuzzyTest.o $(OBJ)/Catalogue.o $(OBJ)/Interval.o $(OBJ)/Event.o $(OBJ)/Fuzzy.o
+# make SearchEngineTest
+SearchEngineTestObjs := $(OBJ)/SearchEngineTest.o
 
-FuzzyTest: $(EXE)/FuzzyTest
+SearchEngineTest: $(EXE)/SearchEngineTest
 	./$<
 
-$(EXE)/FuzzyTest: $(FuzzyTestObjs)
+$(EXE)/SearchEngineTest: $(SearchEngineTestObjs)
 	$(PP) $^ -o $@ $(CXXFLAGS)
 
 # general rule for making all object files
@@ -83,4 +83,4 @@ initialize:
 clean:
 	rm -rf $(OBJ)/* $(EXE)/*
 
-.PHONY: all IntervalTest EventSchedulerTest TopElemsHeapTest FuzzyTest initialize clean
+.PHONY: all IntervalTest EventSchedulerTest TopElemsHeapTest initialize clean
