@@ -1,6 +1,7 @@
 #ifndef SEARCHENGINE_H
 #define SEARCHENGINE_H
 
+#include <TopElemsHeap.h>
 #include <iostream>
 #include <algorithm>
 #include <unordered_map>
@@ -27,7 +28,7 @@ struct Timer
     {
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-        std::cout << "" << tag << " took " << duration.count() << " ms." << std::endl;
+        std::cout << "" << tag << " took about " << duration.count() << " ms." << std::endl;
     }
 };
 
@@ -63,7 +64,7 @@ public:
         std::unordered_map<std::string, double> tfidf;
 
         IndexedEntry()
-            : SearchEntry(), tf(), tfidf(){}
+            : SearchEntry(), tf(), tfidf() {}
         IndexedEntry(
             const std::string& p_name,
             const DataType& p_data)
@@ -127,7 +128,7 @@ private:
     static std::unordered_map<std::string, double> make_tf(
         const std::string& s,
         const size_t& len = 3,
-        bool normalize = false
+        bool normalize = true
     ) {
         std::unordered_map<std::string, double> ret;
         size_t total = 0;
@@ -176,31 +177,6 @@ private:
     }
 
     /**
-     *  @brief Find the union of the keys in the given unordered_maps.
-     *  @param map1 The first unordered_map.
-     *  @param map2 The second unordered_map.
-     *  @return A std::unordered_set with the union of the keys of @p map1
-     *          and @p map2 .
-     */
-    template<typename T, typename U>
-    static std::unordered_set<T> union_keys(
-        const std::unordered_map<T, U>& map1,
-        const std::unordered_map<T, U>& map2
-    ) {
-        std::unordered_set<T> unkeys;
-
-        for (const auto& [a, _] : map1) {
-            unkeys.insert(a);
-        }
-
-        for (const auto& [a, _] : map2) {
-            unkeys.insert(a);
-        }
-
-        return unkeys;
-    }
-
-    /**
      *  @brief Calculate the magnitude of the values of an unordered_map.
      *  @param map The unordered_map.
      *  @return A double representing the magnitude of the @p map .
@@ -233,26 +209,16 @@ private:
     ) {
         double ret = 0.0;
 
-        // Get keys that are in map1 OR map2.
-        std::unordered_set<std::string> distinct = union_keys(map1, map2);
-
-        // Calculate dot-product of values.
-        double res1;
-        double res2;
-
-        for (const auto& key : distinct) {
-            res1 = (map1.find(key) != map1.end()) ? map1.at(key) : 0.0;
-            res2 = (map2.find(key) != map2.end()) ? map2.at(key) : 0.0;
-            ret += res1 * res2;
-        }
-
-        // Divide by magnitude of both maps.
         double mag1 = map_magnitude(map1);
         double mag2 = map_magnitude(map2);
         double mag = mag1 + mag2;
 
         if (mag == 0) {
             return ret;
+        }
+
+        for (const auto& [key, freq] : map1) {
+            ret += freq * ((map2.find(key) != map2.end()) ? map2.at(key) : 0.0);
         }
 
         ret /= mag;
@@ -302,13 +268,17 @@ public:
      *  @param query The query string that can contain multiple terms.
      *  @return A vector of SearchEntrys containing relevant entries.
      */
-    std::vector<ComparableEntry> search(const std::string& query, double threshold = 0.0)
-    {
+    std::vector<ComparableEntry> search(
+        const std::string& query,
+        double threshold = 0.01,
+        size_t max_results = 50
+    ) {
         // Start timer.
         std::string tag = "Search for '" + query + "'";
         Timer timer(tag);
 
-        std::vector<ComparableEntry> c_ret;
+        // Switching to a heap of 10 elems reduces 60+ ms to ~10 ms with O0.
+        TopElemsHeap<ComparableEntry> heap(max_results);
 
         // Make query lowercase.
         std::string l_query = query;
@@ -326,21 +296,17 @@ public:
 
         // Add indexed entries whose cosine similarity is above the threshold.
         double sim;
-        typename std::vector<ComparableEntry>::iterator pos;
-        ComparableEntry ins;
         for (const auto& entry : docs) {
             sim = cosine_similarity(q_tfidf, entry.tfidf);
             if (sim > threshold) {
-                ins = { entry.name, entry.data, sim };
-                // Find sorted position.
-                pos = std::find_if(c_ret.begin(), c_ret.end(), [&](auto s) {
-                    return s < ins;
-                    });
-                c_ret.insert(pos, ins);
+                heap.push({ entry.name, entry.data, sim });
             }
         }
 
-        return c_ret;
+        // Return as a sorted vector.
+        auto ret = heap.getElements();
+        std::sort(ret.rbegin(), ret.rend());
+        return ret;
     }
 
     /**

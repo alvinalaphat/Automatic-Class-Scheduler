@@ -14,7 +14,7 @@ int main()
     }
     search.index();
 
-    auto results = search.search("moreau");
+    auto results = search.search("moreau first year experience");
     std::cout << "Showing " << std::min((size_t)10, results.size()) 
               << " out of " << results.size() << " results." << std::endl;
     size_t i = 0;
