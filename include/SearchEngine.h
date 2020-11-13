@@ -1,13 +1,35 @@
-#ifndef SEARCH_H
-#define SEARCH_H
+#ifndef SEARCHENGINE_H
+#define SEARCHENGINE_H
 
 #include <iostream>
+#include <algorithm>
 #include <unordered_map>
 #include <unordered_set>
+#include <chrono>
 #include <string>
 #include <vector>
-#include <list>
 #include <cmath>
+
+/**
+ *  @class A simple class that prints to standard out when it is destroyed.
+ */
+struct Timer
+{
+    std::chrono::high_resolution_clock::time_point start;
+    std::string tag;
+
+    Timer(const std::string& p_tag) : start(), tag(p_tag)
+    {
+        start = std::chrono::high_resolution_clock::now();
+    }
+
+    virtual ~Timer()
+    {
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+        std::cout << "" << tag << " took " << duration.count() << " ms." << std::endl;
+    }
+};
 
 template<typename DataType>
 class SearchEngine
@@ -21,8 +43,8 @@ public:
      */
     struct SearchEntry
     {
-        const std::string name;
-        const DataType data;
+        std::string name;
+        DataType data;
 
         SearchEntry()
             : name(""), data() {}
@@ -41,15 +63,44 @@ public:
         std::unordered_map<std::string, double> tfidf;
 
         IndexedEntry()
-            : SearchEntry(), tf(), tfidf() {}
+            : SearchEntry(), tf(), tfidf(){}
         IndexedEntry(
             const std::string& p_name,
             const DataType& p_data)
             : SearchEntry(p_name, p_data), tf(), tfidf()
         {
+            // We want to compare by lower-case, so let's do that.
+            std::string l_name = SearchEntry::name;
+            std::transform(l_name.begin(), l_name.end(), l_name.begin(),
+                [](unsigned char c) {return std::tolower(c);});
+
             // Update frequency of n-grams.
-            tf = SearchEngine::make_tf(SearchEntry::name);
+            tf = SearchEngine::make_tf(l_name);
         }
+    };
+
+    /**
+     *  @struct ComparableEntry
+     *  @brief To sort results by similarity and not by data.
+     */
+    struct ComparableEntry : public SearchEntry
+    {
+        double value;
+
+        ComparableEntry()
+            : SearchEntry(), value(0) {}
+        ComparableEntry(
+            const std::string& p_name,
+            const DataType& p_data,
+            const double& p_value)
+            : SearchEntry(p_name, p_data), value(p_value) {}
+
+        bool operator<(const ComparableEntry& other) const { return value < other.value; }
+        bool operator>(const ComparableEntry& other) const { return value > other.value; }
+        bool operator<=(const ComparableEntry& other) const { return value <= other.value; }
+        bool operator>=(const ComparableEntry& other) const { return value >= other.value; }
+        bool operator==(const ComparableEntry& other) const { return value == other.value; }
+        bool operator!=(const ComparableEntry& other) const { return not (value == other.value); }
     };
 
     /* ---------------------------------------------------------------- */
@@ -75,7 +126,8 @@ private:
      */
     static std::unordered_map<std::string, double> make_tf(
         const std::string& s,
-        const size_t& len = 3
+        const size_t& len = 3,
+        bool normalize = false
     ) {
         std::unordered_map<std::string, double> ret;
         size_t total = 0;
@@ -86,15 +138,17 @@ private:
             ++total;
         }
 
-        // Total counts of ngrams should never be 0.
+        // This can occur if query string is empty.
         if (total == 0) {
             return ret;
         }
 
         // Now, we will normalize the frequencies.
-        double d_total = (double)total;
-        for (const auto& [ngram, _] : ret) {
-            ret[ngram] /= d_total;
+        if (normalize) {
+            double d_total = (double)total;
+            for (const auto& [ngram, _] : ret) {
+                ret[ngram] /= d_total;
+            }
         }
 
         return ret;
@@ -107,7 +161,7 @@ private:
      *  @return The n-grams of @p s .
      */
     static std::vector<std::string> make_ngrams(
-        const std::string& s, 
+        const std::string& s,
         const size_t& len = 3
     ) {
         std::vector<std::string> ret;
@@ -135,11 +189,11 @@ private:
     ) {
         std::unordered_set<T> unkeys;
 
-        for (const auto& [a, b] : map1) {
+        for (const auto& [a, _] : map1) {
             unkeys.insert(a);
         }
 
-        for (const auto& [a, b] : map2) {
+        for (const auto& [a, _] : map2) {
             unkeys.insert(a);
         }
 
@@ -157,7 +211,7 @@ private:
         double res = 0;
 
         // Square each value.
-        for (const auto& [a, b] : map) {
+        for (const auto& [_, b] : map) {
             res += (double)(b * b);
         }
 
@@ -166,6 +220,7 @@ private:
 
         return res;
     }
+
     /**
      *  @brief Calculate cosine silarity between two unordered maps.
      *  @param map1 The first unordered_map.
@@ -247,30 +302,45 @@ public:
      *  @param query The query string that can contain multiple terms.
      *  @return A vector of SearchEntrys containing relevant entries.
      */
-    std::vector<SearchEntry> search(std::string query, double threshold = 1.0)
+    std::vector<ComparableEntry> search(const std::string& query, double threshold = 0.0)
     {
-        std::vector<SearchEntry> ret;
+        // Start timer.
+        std::string tag = "Search for '" + query + "'";
+        Timer timer(tag);
+
+        std::vector<ComparableEntry> c_ret;
+
+        // Make query lowercase.
+        std::string l_query = query;
+        std::transform(l_query.begin(), l_query.end(), l_query.begin(),
+            [](unsigned char c) { return std::tolower(c); });
 
         // Calculate tfidf of terms in query string.
-        double d_N = (double) docs.size();
+        double d_N = (double)docs.size();
         std::unordered_map<std::string, double> q_tfidf;
-        for (const auto& [ngram, freq] : make_tf(query)) {
+        for (const auto& [ngram, freq] : make_tf(l_query)) {
             if (occ.find(ngram) != occ.end()) {
-                q_tfidf[ngram] = freq * (1 + std::log(d_N / (double) occ.at(ngram)));
+                q_tfidf[ngram] = freq * (1 + std::log(d_N / (double)occ.at(ngram)));
             }
         }
 
         // Add indexed entries whose cosine similarity is above the threshold.
-        double sim = 0.0;
+        double sim;
+        typename std::vector<ComparableEntry>::iterator pos;
+        ComparableEntry ins;
         for (const auto& entry : docs) {
             sim = cosine_similarity(q_tfidf, entry.tfidf);
-            std::cout << sim << std::endl;
             if (sim > threshold) {
-                ret.push_back((SearchEntry) entry);
+                ins = { entry.name, entry.data, sim };
+                // Find sorted position.
+                pos = std::find_if(c_ret.begin(), c_ret.end(), [&](auto s) {
+                    return s < ins;
+                    });
+                c_ret.insert(pos, ins);
             }
         }
 
-        return ret;
+        return c_ret;
     }
 
     /**
@@ -278,22 +348,21 @@ public:
      */
     void index()
     {
-        double d_N = (double) docs.size();
+        double d_N = (double)docs.size();
 
         // Calculate idf for each term present in corpus.
         for (const auto& [ngram, freq] : occ) {
-            idf[ngram] = 1 + std::log(d_N / (double) freq);
+            idf[ngram] = 1 + std::log(d_N / (double)freq);
         }
 
         // Calculate tfidf for each term in every document in corpus.
         for (auto& index : docs) {
             for (const auto& [ngram, freq] : index.tf) {
                 index.tfidf[ngram] = freq * idf[ngram];
-                std::cout << ngram << " -> " << index.tfidf[ngram] << std::endl;
             }
         }
     }
 
 };
 
-#endif /* SEARCH_H */
+#endif /* SEARCHENGINE_H */

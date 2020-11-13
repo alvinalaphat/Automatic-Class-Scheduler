@@ -15,7 +15,7 @@ CXXFLAGS := -m64 -std=c++2a -Weffc++ $(CFLAGS)
 all: jsonTest CatalogueTest IntervalTest TopElemsHeapTest EventSchedulerTest SearchEngineTest
 
 # general include dependencies
-DEPS := $(INC)/Interval.h $(INC)/Event.h $(INC)/EventScheduler.h $(INC)/TopElemsHeap.h $(INC)/json.h $(INC)/Catalogue.h $(INC)/Fuzzy.h
+DEPS := $(INC)/Interval.h $(INC)/Event.h $(INC)/EventScheduler.h $(INC)/TopElemsHeap.h $(INC)/json.h $(INC)/Catalogue.h
 
 # make JSONTest
 jsonTestObjs := $(OBJ)/jsonTest.o
@@ -27,7 +27,7 @@ $(EXE)/jsonTest: $(jsonTestObjs)
 	$(PP) $^ -o $@ $(CXXFLAGS)
 
 # make CatalogueTest
-CatalogueTestObjs := $(OBJ)/CatalogueTest.o $(OBJ)/Catalogue.o $(OBJ)/Interval.o $(OBJ)/Event.o $(OBJ)/Fuzzy.o
+CatalogueTestObjs := $(OBJ)/CatalogueTest.o $(OBJ)/Catalogue.o $(OBJ)/Interval.o $(OBJ)/Event.o
 
 CatalogueTest: $(EXE)/CatalogueTest
 	$(EXE)/./CatalogueTest
@@ -63,7 +63,7 @@ $(EXE)/TopElemsHeapTest: $(TopElemsHeapTestObjs)
 	$(PP) $^ -o $@ $(CXXFLAGS)
 
 # make SearchEngineTest
-SearchEngineTestObjs := $(OBJ)/SearchEngineTest.o
+SearchEngineTestObjs := $(OBJ)/SearchEngineTest.o $(OBJ)/Catalogue.o $(OBJ)/Interval.o $(OBJ)/Event.o
 
 SearchEngineTest: $(EXE)/SearchEngineTest
 	./$<
