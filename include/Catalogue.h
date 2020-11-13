@@ -6,116 +6,83 @@
 #include "Event.h"
 #include "Interval.h"
 #include "json.h"
-#include "Comparable.h"
+#include "SearchEngine.h"
 #include <string>
 #include <unordered_map>
-
-/* ---------------------------------------------------------------------- */
-
-class Entry
-{
-
-public:
-
-  Entry();
-  Entry(
-    size_t p_id,
-    std::string p_name,
-    Event p_event,
-    std::unordered_map<std::string, std::vector<std::string>> p_tags);
-
-  inline size_t id() const { return m_id; }
-  inline const std::string& name() const { return m_name; }
-  inline const Event& event() const { return m_event; }
-  inline const std::unordered_map<
-    std::string, std::vector<std::string>>&tags() const { return m_tags; }
-
-  friend std::ostream& operator<<(std::ostream&, const Entry&);
-
-private:
-
-  size_t m_id;
-  std::string m_name;
-  Event m_event;
-  std::unordered_map<std::string, std::vector<std::string>> m_tags;
-
-};
 
 /* ---------------------------------------------------------------------- */
 
 class Catalogue
 {
 
-  /**
-   *  @brief Caches a name with id so that it can be searched for later.
-   *  @param id The id associated with the name.
-   *  @param name The name to cache.
-   */
-  void cache(int id, const std::string& name);
-
-  /**
-   * 
-   * 
-   * 
-   */
-  double tfidf(
-    const std::unordered_map<std::string, size_t>& indiv,
-    const std::unordered_map<std::string, size_t>& other
-  );
-
-  /**
-   * 
-   * 
-   * 
-   */
-  void add_entry(Entry ent);
-
 public:
 
-  Catalogue();
+    /**
+     *  @struct To hold Catalogue entries, containing Scheduler event input, with
+     *          some extra metadata.
+     */
+    struct Entry
+    {
+        size_t id;
+        std::string name;
+        Event event;
+        std::unordered_map<std::string, std::vector<std::string>> tags;
 
-  /**
-   *  @brief Creates a catalogue from a given json filename.
-   */
-  Catalogue(std::string json_filename);
+        Entry(); // needs to be default-constructible for json.
+        Entry(
+            size_t p_id,
+            std::string p_name,
+            Event p_event,
+            std::unordered_map<std::string, std::vector<std::string>> p_tags);
+        
+        friend std::ostream& operator<<(std::ostream&, const Entry&);
+    };
 
-  /**
-   *  @brief Loads a json file into this catalogue.
-   *  @param json_filename The name of the json file to load.
-   *  @return EXIT_SUCCESS on success, EXIT_FAILURE on failure. Note, on failure,
-   *          this catalogue is not modified. On success, this catalogue is modified.
-   */
-  int load(std::string json_filename);
+    Catalogue();
 
-  /**
-   *  @brief Returns the number of entries in this catalogue.
-   *  @return The number of entries in this catalogue.
-   */
-  inline size_t size() const { return m_entries.size(); }
+    /**
+     *  @brief Creates a catalogue from a given json filename.
+     */
+    Catalogue(std::string json_filename);
 
-  /**
-   *  @brief Returns the ids of the entries in this catalogue.
-   *  @return A vector containing the ids of the entries in this catalogue.
-   */
-  std::vector<size_t> ids() const;
+    /**
+     *  @brief Loads a json file into this catalogue.
+     *  @param json_filename The name of the json file to load.
+     *  @return EXIT_SUCCESS on success, EXIT_FAILURE on failure. Note, on failure,
+     *          this catalogue is not modified. On success, this catalogue is modified.
+     */
+    int load(std::string json_filename);
 
-  // Both attempt to get Entry with given id, return empty Entry on failure.
-  const Entry& at(size_t p_id);
+    /**
+     *  @brief Returns the number of entries in this catalogue.
+     *  @return The number of entries in this catalogue.
+     */
+    inline size_t size() const { return entries.size(); }
 
-  // Returns TRUE if id exists in entries, else FALSE.
-  inline bool has(size_t p_id) const { return m_entries.find(p_id) != m_entries.end(); }
+    /**
+     *  @brief Returns the ids of the entries in this catalogue.
+     *  @return A vector containing the ids of the entries in this catalogue.
+     */
+    std::vector<size_t> ids() const;
 
-  friend std::ostream& operator<<(std::ostream&, const Catalogue&);
+    // Both attempt to get Entry with given id, return empty Entry on failure.
+    const Entry& at(size_t p_id);
 
-  // Returns a vector of entries that are similar to name of class.
-  std::vector<Comparable<Entry>> search(
-    const std::string& name,
-    size_t max_results,
-    double threshold = 1.0);
+    // Returns TRUE if id exists in entries, else FALSE.
+    inline bool has(size_t p_id) const { return entries.find(p_id) != entries.end(); }
+
+    friend std::ostream& operator<<(std::ostream&, const Catalogue&);
+
+    // Returns a vector of entries that are similar to name of class.
+    std::vector<Entry> search(
+        const std::string& name,
+        size_t max_results = 50,
+        double threshold = 0.01);
 
 private:
 
-  std::unordered_map<size_t, Entry> m_entries;
+    std::unordered_map<size_t, Entry> entries;
+    SearchEngine<size_t> engine;
 
 };
 

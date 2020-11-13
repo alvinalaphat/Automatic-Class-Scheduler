@@ -10,11 +10,11 @@ int main()
 
     Catalogue cat("data/nd_courses_2021.json");
     for (const auto& id : cat.ids()) {
-        search.insert(cat.at(id).name(), id);
+        search.insert(cat.at(id).name, id);
     }
     search.index();
 
-    auto results = search.search("moreau");
+    auto results = search.search("moreau first year experience");
     std::cout << "Showing " << std::min((size_t)10, results.size()) 
               << " out of " << results.size() << " results." << std::endl;
     size_t i = 0;
