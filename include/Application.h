@@ -35,6 +35,8 @@ void PrintWelcomeMessage()
     "COOL                      YES                    PLACEHOLDER\n"
     "    SCHEDULING       THING   INDEED     CERTAINLY           TEXT\n"
     "              PROJECT               MOST\n";
+    std::cout << "There are \033[0;36m" << cat.size() << "\033[0m events available." << std::endl;
+    std::cout << "(Enter (h|H) to show the help menu.)" << std::endl;
 }
 
 /**
@@ -79,16 +81,8 @@ int ParseInt(const std::string& s)
  */
 void DoSearch()
 {
-    std::string terms = GetResponse("Please enter \033[31msearch\033[0m term(s): ");
+    std::string terms = GetResponse("Please enter \033[0;36msearch\033[0m term(s): ");
 
-}
-
-/**
- *  @brief Gives user first time help-hint.
- */
-void PrintFirstTimeHelp()
-{
-    std::cout << "(Enter (h|H) to show the help menu.)" << std::endl;
 }
 
 /**
@@ -98,12 +92,12 @@ void PrintHelp()
 {
     std::cout <<
     "Available options:\n"
-    "  (h|H)  show this \033[31mhelp\033[0m menu\n"
-    "  (b|B)  \033[31mbuild\033[0m optimal/near-optimal schedule\n"
-    "  (s|S)  \033[31msearch\033[0m for events\n"
-    "  (l|L)  \033[31mlist\033[0m currently selected events\n"
-    "  (q|Q)  \033[31mquit\033[0m the application\n"
-    "  (DIG)  add a class by \033[31mid\033[0m to selected events";
+    "  (h|H)  show this \033[0;36mhelp\033[0m menu\n"
+    "  (b|B)  \033[0;36mbuild\033[0m optimal/near-optimal schedule\n"
+    "  (s|S)  \033[0;36msearch\033[0m for events\n"
+    "  (l|L)  \033[0;36mlist\033[0m currently selected events\n"
+    "  (q|Q)  \033[0;36mquit\033[0m the application\n"
+    "  (DIG)  add a class by \033[0;36mid\033[0m to selected events\n";
 }
 
 /**
@@ -113,6 +107,11 @@ void PrintHelp()
 bool HandleInput()
 {
     std::string response = GetResponse(">> ");
+
+    // Continue handling input if they just press enter.
+    if (response.size() == 0) {
+        return true;
+    }
 
     switch (response.at(0)) { // check first character
         
@@ -138,6 +137,12 @@ bool HandleInput()
         case 'b':
         case 'B':
             std::cout << "Building schedule..." << std::endl;
+            break;
+        
+        // List.
+        case 'l':
+        case 'L':
+            std::cout << "Listing selected events..." << std::endl;
             break;
         
         // DIG.
@@ -181,15 +186,14 @@ int Run(bool verbose = true)
 {
     /* LOAD CATALOGUE */
     if (verbose) std::cout << "Loading catalogue...";
-    if (cat.load("data/nd_courses.json") == EXIT_FAILURE) {
+    if (cat.load("data/nd_courses_2021.json") == EXIT_FAILURE) {
         std::cout << "Error loading catalogue!" << std::endl;
         return EXIT_FAILURE;
     }
     if (verbose) std::cout << "Done!" << std::endl;
 
-    /* PRINT WELCOME MESSAGE AND HANDLE INPUT */
+    /* PRINT WELCOME MESSAGE AND ENTER INPUT LOOP */
     PrintWelcomeMessage();
-    PrintFirstTimeHelp();
     while (HandleInput());
 
     return EXIT_SUCCESS;
