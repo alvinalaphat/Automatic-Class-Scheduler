@@ -129,7 +129,6 @@ std::vector<size_t> Catalogue::ids() const {
  */
 const Entry& Catalogue::at(size_t p_id) {
     if (m_entries.find(p_id) == m_entries.end()) {
-        std::cout << p_id << std::endl;
         throw std::out_of_range("key not found");
     } else {
         return m_entries.at(p_id);
