@@ -14,7 +14,7 @@ int main() {
         if (i++ > 5) break;
         std::cout << cat.at(id);
     }
-
+    
     std::cout << "===============================================" << std::endl;
     return EXIT_SUCCESS;
 }

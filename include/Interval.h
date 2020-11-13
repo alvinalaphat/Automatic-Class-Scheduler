@@ -1,6 +1,6 @@
 
-#ifndef INTERVALS_H
-#define INTERVALS_H
+#ifndef INTERVAL_H
+#define INTERVAL_H
 
 #include <vector>
 #include <iostream>

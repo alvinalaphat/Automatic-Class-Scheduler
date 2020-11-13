@@ -12,12 +12,13 @@ CFLAGS := -O0 -g -Wall -Wextra -Wconversion -Wshadow -pedantic -Werror -I$(INC)
 CXXFLAGS := -m64 -std=c++2a -Weffc++ $(CFLAGS)
 
 # make all
-all: jsonTest CatalogueTest intervalTest EventSchedulerTest
+all: jsonTest CatalogueTest IntervalTest TopElemsHeapTest EventSchedulerTest SearchEngineTest
+
+# general include dependencies
+DEPS := $(INC)/Interval.h $(INC)/Event.h $(INC)/EventScheduler.h $(INC)/TopElemsHeap.h $(INC)/json.h $(INC)/Catalogue.h
 
 # make JSONTest
 jsonTestObjs := $(OBJ)/jsonTest.o
-
-jsonTestDeps := $(INC)/json.h
 
 jsonTest: $(EXE)/jsonTest
 	$(EXE)/./jsonTest
@@ -25,13 +26,8 @@ jsonTest: $(EXE)/jsonTest
 $(EXE)/jsonTest: $(jsonTestObjs)
 	$(PP) $^ -o $@ $(CXXFLAGS)
 
-$(OBJ)/%.o: $(SRC)/%.cpp $(jsonTestDeps)
-	$(PP) $< -o $@ $(CXXFLAGS) -c
-
 # make CatalogueTest
 CatalogueTestObjs := $(OBJ)/CatalogueTest.o $(OBJ)/Catalogue.o $(OBJ)/Interval.o $(OBJ)/Event.o
-
-CatalogueTestDeps := $(INC)/Catalogue.h $(INC)/Interval.h $(INC)/Event.h
 
 CatalogueTest: $(EXE)/CatalogueTest
 	$(EXE)/./CatalogueTest
@@ -39,19 +35,13 @@ CatalogueTest: $(EXE)/CatalogueTest
 $(EXE)/CatalogueTest: $(CatalogueTestObjs)
 	$(PP) $^ -o $@ $(CXXFLAGS)
 
-$(OBJ)/%.o: $(SRC)/%.cpp $(CatalogueTestDeps)
-	$(PP) $< -o $@ $(CXXFLAGS) -c
+# make IntervalTest
+IntervalTestObjs := $(OBJ)/IntervalTest.o $(OBJ)/Interval.o
 
-# general include dependencies
-DEPS := $(INC)/Interval.h $(INC)/Event.h $(INC)/EventScheduler.h
-
-# make intervalTest
-intervalTestObjs := $(OBJ)/intervalTest.o $(OBJ)/Interval.o
-
-intervalTest: $(EXE)/intervalTest
+IntervalTest: $(EXE)/IntervalTest
 	./$<
 
-$(EXE)/intervalTest: $(intervalTestObjs)
+$(EXE)/IntervalTest: $(IntervalTestObjs)
 	$(PP) $^ -o $@ $(CXXFLAGS)
 
 # make EventSchedulerTest
@@ -61,6 +51,24 @@ EventSchedulerTest: $(EXE)/EventSchedulerTest
 	./$<
 
 $(EXE)/EventSchedulerTest: $(EventSchedulerTestObjs)
+	$(PP) $^ -o $@ $(CXXFLAGS)
+
+# make TopElemsHeapTest
+TopElemsHeapTestObjs := $(OBJ)/TopElemsHeapTest.o
+
+TopElemsHeapTest: $(EXE)/TopElemsHeapTest
+	./$<
+
+$(EXE)/TopElemsHeapTest: $(TopElemsHeapTestObjs)
+	$(PP) $^ -o $@ $(CXXFLAGS)
+
+# make SearchEngineTest
+SearchEngineTestObjs := $(OBJ)/SearchEngineTest.o $(OBJ)/Catalogue.o $(OBJ)/Interval.o $(OBJ)/Event.o
+
+SearchEngineTest: $(EXE)/SearchEngineTest
+	./$<
+
+$(EXE)/SearchEngineTest: $(SearchEngineTestObjs)
 	$(PP) $^ -o $@ $(CXXFLAGS)
 
 # general rule for making all object files
@@ -75,4 +83,4 @@ initialize:
 clean:
 	rm -rf $(OBJ)/* $(EXE)/*
 
-.PHONY: all initialize clean 
+.PHONY: all IntervalTest EventSchedulerTest TopElemsHeapTest initialize clean

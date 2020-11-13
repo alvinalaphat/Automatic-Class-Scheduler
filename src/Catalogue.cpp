@@ -6,6 +6,10 @@
 #include <json.h>
 #include <string>
 #include <vector>
+#include <TopElemsHeap.h>
+#include <Comparable.h>
+#include <algorithm>
+#include <cmath>
 
 /* ---------------------------------------------------------------------- */
 
@@ -74,9 +78,12 @@ void from_json(const nlohmann::json& j, Entry& e)
     );
 }
 
+
+
 /* ---------------------------------------------------------------------- */
 
-Catalogue::Catalogue() : m_entries() {}
+Catalogue::Catalogue()
+	: m_entries() {}
 
 /**
  *  @brief Constructor to pre-load json courses. 
