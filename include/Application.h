@@ -133,9 +133,22 @@ class Application
             return;
         }
 
+        // Double-check -f they want to add this event.
+        std::string confirm_str = GetResponse(
+            "Add event with name \033[0;36m'" + cat.at(id).name + "'\033[0m?"
+            " (y/n) ");
+        if (confirm_str.size() == 0) {
+            return;
+        }
+
+        char confirm = (char)std::tolower(confirm_str.at(0));
+        if (confirm == 'n') {
+            return;
+        }
+
         // Parse priority.
-        std::string str_priority = GetResponse("Please enter an \033[0;36mintegral"
-            "\033[0m priority (larger is more preferred): ");
+        std::string str_priority = GetResponse("Please enter an integral "
+            "\033[0;36mpriority\033[0m (larger is more preferred): ");
         double priority = ParseNumber<double>(str_priority);
 
         // Add to list of selections.
@@ -155,19 +168,26 @@ class Application
             std::cout << "Listing all " << sel.size() << " selections." << std::endl;
 
             // Find longest name, so we can adapt to length of name and avoid magic numbers.
+            // Also find longest event_id length.
             int len = 0;
+            int event_len = 0;
             for (const auto& s : sel) {
                 if ((int)cat.at(s.id).name.size() > len) {
                     len = (int)cat.at(s.id).name.size();
                 }
+                if ((int)std::log((int)cat.at(s.id).id) + 1 > event_len) {
+                    event_len = (int)std::log((int)cat.at(s.id).id) + 1;
+                }
             }
             len += 2;
+            event_len += 2;
 
+            // Find longest event id, so we can adapt.
             // Now, print all selections out.
             for (const auto& s : sel) {
                 std::cout << std::left << "  "
-                    << std::setw((int)len) << cat.at(s.id).name
-                    << std::setw(12) << s.id
+                    << std::setw(len) << cat.at(s.id).name
+                    << std::setw(event_len) << s.id
                     << s.priority << std::endl;
             }
         }
@@ -206,15 +226,21 @@ class Application
         // Fill build.
         for (const auto& selection : sel) {
             const Event& event = cat.at(selection.id).event;
+            bool conflict = false;
             // Only add event if none of its sections intersect any of the exclusions.
             for (size_t i = 0; i < event.size(); ++i) { // Loop through sections of event.
                 for (size_t j = 0; j < excl.size(); ++j) { // Loop through exclusions.
                     if (excl.at(j).intersects(event.getSection(i))) {
+                        std::cout << "Unable to attend event with \033[0;36mid\033[0m "
+                            << selection.id << " due to exclusions." << std::endl;
+                        conflict = true;
                         break;
                     }
                 }
             }
-            build.push_back({selection.id, selection.priority, event});
+            if (not conflict) {
+                build.push_back({ selection.id, selection.priority, event });
+            }
         }
 
         if (build.size() == 0) {
@@ -226,11 +252,22 @@ class Application
         // No intersections in build!
         EventScheduler sched;
         for (const auto& [id, priority, event] : build) {
-            sched.addEvent(event, (int)id, priority);
+            sched.addEvent(event, (unsigned int)id, priority);
         }
-        
+
         // Print out result!
         auto result = sched.buildOptimalSchedule();
+        for (const auto& [entry_id, section_id] : result) {
+            std::cout << "  " << cat.at(entry_id).name << std::endl;
+
+            std::cout << "    times: " << cat.at(entry_id).event.getSection(section_id)
+                << std::endl;
+
+            for (const auto& [tag, tag_list] : cat.at(entry_id).tags) {
+                std::cout << "    " << tag << ": "
+                    << tag_list.at(section_id) << std::endl;
+            }
+        }
     }
 
     /**
@@ -247,8 +284,14 @@ class Application
             GetResponse("Please enter ending time hour (military format): "));
         size_t end_min = ParseNumber<size_t>(
             GetResponse("Please enter ending time minutes: "));
-        std::string days = GetResponse("Please enter the days (MTWRF) on which"
+        
+        std::string str_days = GetResponse("Please enter the days (MTWRF) on which"
             " this exclusion should be applied: ");
+        
+        std::unordered_set<char> days;
+        for (const char& c : str_days) {
+            days.insert(c);
+        }
 
         double start = (double)start_hour * 60 + (double)start_min;
         double end = (double)end_hour * 60 + (double)end_min;

@@ -197,9 +197,12 @@ std::vector<std::pair<unsigned int, unsigned int>> EventScheduler::buildOptimalS
 		// augment the schedules already made with the new ones
 		schedules.insert(schedules.end(), newSchedules.begin(), newSchedules.end());
 
+#ifdef EVENTSCHEDULER_DEBUG
 		std::cout << schedules.size() <<std::endl;
+#endif
 	}
 
+#ifdef EVENTSCHEDULER_DEBUG
 	// debugging -- print candidate schedules
 	std::cout << "Potential schedules" << std::endl;
 	for (auto& sched: schedules) {
@@ -212,6 +215,7 @@ std::vector<std::pair<unsigned int, unsigned int>> EventScheduler::buildOptimalS
 
 		std::cout << std::endl;
 	}
+#endif
 
 	// find the best schedule
 	size_t bestIndex = 0;
