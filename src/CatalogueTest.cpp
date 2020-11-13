@@ -14,6 +14,11 @@ int main() {
         if (i++ > 5) break;
         std::cout << cat.at(id);
     }
+
+    std::cout << "Showing (max) 10 results for searching for 'chinese'" << std::endl;
+    for (const auto& entry : cat.search("chinese", 10)) {
+        std::cout << entry;
+    }
     
     std::cout << "===============================================" << std::endl;
     return EXIT_SUCCESS;

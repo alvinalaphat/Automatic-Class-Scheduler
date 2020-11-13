@@ -10,7 +10,7 @@ int main()
 
     Catalogue cat("data/nd_courses_2021.json");
     for (const auto& id : cat.ids()) {
-        search.insert(cat.at(id).name(), id);
+        search.insert(cat.at(id).name, id);
     }
     search.index();
 
