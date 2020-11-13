@@ -9,6 +9,7 @@
 #include <Catalogue.h>
 #include <iostream>
 #include <string>
+#include <list>
 
 /**
  *  I know these will quickly go out of date and that these are usually handled
@@ -23,8 +24,19 @@
  */
 class Application
 {
+
+/**
+ *  @brief To hold user selection about scheduler.
+ */
+struct Selection
+{
+    size_t id;
+    double priority;
+};
+
 /* ---------------------------------------------------------------- */
 Catalogue cat;
+std::list<Selection> sel;
 
 /**
  *  @brief Prints welcome message to standard out.
