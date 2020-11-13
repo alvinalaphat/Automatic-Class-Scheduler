@@ -7,7 +7,7 @@ EventScheduler::EventScheduler() : eventsToSchedule(), events(), conflicts() {}
 
 // getSectionID
 // produce the sectionID for an section given its eventID and section index
-EventScheduler::SectionID EventScheduler::getSectionID(int eventID,
+EventScheduler::SectionID EventScheduler::getSectionID(unsigned int eventID,
 	unsigned int sectionIndex) const {
 
 	return ((SectionID)eventID << 32) | (SectionID)sectionIndex;
@@ -71,7 +71,7 @@ bool EventScheduler::EventWrapper::operator==(const EventWrapper& rhs) const {
 // id that is unique to this event scheduler must be specified; A weight
 // describing the preference for this event can be included as well; if not
 // specified it will default to 1.0
-void EventScheduler::addEvent(const Event& event, int id, double weight) {
+void EventScheduler::addEvent(const Event& event, unsigned int id, double weight) {
 
 	// add the event to the priority queue and id lookup table, and find its
 	// conflicts with other events
@@ -155,7 +155,7 @@ void EventScheduler::display(std::ostream& os) const {
 // first the event id and second the section index
 // This is effectively a brute force attempt to find the independent set of the
 // conflicts graph that has the largest combined weight
-std::vector<std::pair<int, unsigned int>> EventScheduler::buildOptimalSchedule()
+std::vector<std::pair<unsigned int, unsigned int>> EventScheduler::buildOptimalSchedule()
 	const {
 
 	// copy the unscheduled events so that we don't overwrite the class member
@@ -225,7 +225,7 @@ std::vector<std::pair<int, unsigned int>> EventScheduler::buildOptimalSchedule()
 	}
 
 	// convert that schedule into the return format
-	std::vector<std::pair<int, unsigned int>> retSched;
+	std::vector<std::pair<unsigned int, unsigned int>> retSched;
 	for (SectionID secID: schedules[bestIndex].sched) {
 		
 		retSched.push_back({(int)(secID >> 32), (unsigned int)secID});
@@ -237,7 +237,7 @@ std::vector<std::pair<int, unsigned int>> EventScheduler::buildOptimalSchedule()
 // buildApproxSchedule
 // use the same technique as buildOptimalSchedule, but limit the number of
 // schedules under consideration every round
-std::vector<std::pair<int, unsigned int>> EventScheduler::buildApproxSchedule()
+std::vector<std::pair<unsigned int, unsigned int>> EventScheduler::buildApproxSchedule()
 	const {
 
 	// copy the unscheduled events so that we don't overwrite the class member
@@ -297,7 +297,7 @@ std::vector<std::pair<int, unsigned int>> EventScheduler::buildApproxSchedule()
 	}
 
 	// convert that schedule into the return format
-	std::vector<std::pair<int, unsigned int>> retSched;
+	std::vector<std::pair<unsigned int, unsigned int>> retSched;
 	for (SectionID secID: schedules.getElements()[bestIndex].sched) {
 		
 		retSched.push_back({(int)(secID >> 32), (unsigned int)secID});
