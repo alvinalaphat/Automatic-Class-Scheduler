@@ -229,7 +229,7 @@ class Application
         
         std::cout << std::endl;
         std::cout << "\033[0;36m                    -------------------------------\n";
-        std::cout << "                    OPTIMAL     CLASS    SCHEDULE \n";
+        std::cout << "                     OPTIMAL     CLASS    SCHEDULE \n";
         std::cout << "                    -------------------------------\n\n\033[0m";
 
         // Fill build.
@@ -472,14 +472,14 @@ std::ostream& displayTimes(const IntervalGroup& igroup) {
 	for (size_t i = 0; i < igroup.getIntervalSize(); ++i) {
         int minutes = (int)igroup.getInterval((unsigned int)i).first % 1440 % 60;
         int hours = (int)igroup.getInterval((unsigned int)i).first % 1440 / 60;
+        std::string ampm = hours < 12 ? "AM" : "PM";
         hours = hours > 12 ? hours - 12 : hours;
-        std::string ampm = hours < 12 ? "AM" : "PM"; 
         ampm = minutes == 0 ? ampm = "0 " + ampm : " " + ampm; 
 
         int minutes2 = (int)igroup.getInterval((unsigned int)i).second % 1440 % 60;
         int hours2 = (int)igroup.getInterval((unsigned int)i).second % 1440 / 60;
+        std::string ampm2 = hours2 < 12 ? "AM" : "PM";
         hours2 = hours2 > 12 ? hours2 - 12 : hours2;
-        std::string ampm2 = hours < 12 ? "AM" : "PM";
         ampm2 = minutes2 == 0 ? ampm2 = "0 " + ampm2 : " " + ampm2; 
 
 		std::cout << "[" << weekdays.at(((int)igroup.getInterval((unsigned int)i).first / 1440)) << ": " << hours << ":" << minutes << ampm << " - " <<
