@@ -50,11 +50,13 @@ class Application
      */
     void PrintWelcomeMessage()
     {
-        std::cout <<
-            "WELCOME     TO         CLASS      SCHEDULER\n"
-            "                                           \n"
-            "-------------------------------------------\n";
-        std::cout << "There are \033[0;36m" << cat.size() << "\033[0m events available." << std::endl;
+        std::cout << std::endl;
+        std::cout <<  
+            "\033[0;36m-------------------------------------------\n"
+            " Welcome     to      Class    Registration \n"
+            "-------------------------------------------\n\033[0m";
+        std::cout << std::endl;
+        std::cout << "There are \033[0;36m" << cat.size() << "\033[0m classes available." << std::endl;
         std::cout << "(Enter (h|H) to show the help menu.)" << std::endl;
     }
 
@@ -99,7 +101,7 @@ class Application
         // Get query term, and search catalogue.
         std::string terms = GetResponse("Please enter \033[0;36msearch\033[0m term(s): ");
         auto results = cat.search(terms, 10);
-        std::cout << "Showing " << results.size() << " most relevant results." << std::endl;
+        std::cout << "\nShowing the top " << results.size() << " relevant results." << std::endl;
 
         // Find longest name, so we can adapt to length of name and avoid magic numbers.
         int len = 0;
@@ -128,14 +130,14 @@ class Application
 
         // Return if not valid id.
         if (not cat.has(id)) {
-            std::cout << "An event with that id does \033[0;36mnot\033[0m exist."
+            std::cout << "\nA class with that id does \033[0;36mnot\033[0m exist."
                 << std::endl;
             return;
         }
 
         // Double-check -f they want to add this event.
         std::string confirm_str = GetResponse(
-            "Add event with name \033[0;36m'" + cat.at(id).name + "'\033[0m?"
+            "Add class with name \033[0;36m'" + cat.at(id).name + "'\033[0m?"
             " (y/n) ");
         if (confirm_str.size() == 0) {
             return;
@@ -148,11 +150,13 @@ class Application
 
         // Parse priority.
         std::string str_priority = GetResponse("Please enter an integral "
-            "\033[0;36mpriority\033[0m (larger is more preferred): ");
+            "\033[0;36mpriority\033[0m (larger means more preferred): ");
         double priority = ParseNumber<double>(str_priority);
 
         // Add to list of selections.
         sel.push_back({ id, priority });
+        std::cout << std::endl;
+        std::cout << "\033[0;36m" << cat.at(id).name << " has been added!\033[0m" << std::endl << std::endl;
     }
 
     /**
@@ -162,10 +166,10 @@ class Application
     {
         // List selections.
         if (sel.size() == 0) {
-            std::cout << "You have \033[0;36mno\033[0m current selections." << std::endl;
+            std::cout << "\nYou have \033[0;36mno\033[0m current selection(s)." << std::endl;
         }
         else {
-            std::cout << "Listing all " << sel.size() << " selections." << std::endl;
+            std::cout << "\nListing " << sel.size() << " selection(s)." << std::endl;
 
             // Find longest name, so we can adapt to length of name and avoid magic numbers.
             // Also find longest event_id length.
@@ -194,10 +198,10 @@ class Application
 
         // List exclusions.
         if (excl.size() == 0) {
-            std::cout << "You have \033[0;36mno\033[0m current time exclusions." << std::endl;
+            std::cout << "\nYou have \033[0;36mno\033[0m current time exclusion(s)." << std::endl;
         }
         else {
-            std::cout << "Listing all " << excl.size() << " exclusions." << std::endl;
+            std::cout << "\nListing " << excl.size() << " exclusion(s)." << std::endl;
 
             // Find longest number, so we can adapt to length of number.
             int len = (int)std::log((int)excl.size()) + 1 + 2;
@@ -217,11 +221,16 @@ class Application
     void DoBuild()
     {
         if (sel.size() == 0) {
-            std::cout << "You have \033[0;36mno\033[0m current selections." << std::endl;
+            std::cout << "\nYou have \033[0;36mno\033[0m current selections." << std::endl;
             return;
         }
 
         std::list<std::tuple<size_t, double, Event>> build;
+        
+        std::cout << std::endl;
+        std::cout << "\033[0;36m                    -------------------------------\n";
+        std::cout << "                    OPTIMAL     CLASS    SCHEDULE \n";
+        std::cout << "                    -------------------------------\n\n\033[0m";
 
         // Fill build.
         for (const auto& selection : sel) {
@@ -231,7 +240,7 @@ class Application
             for (size_t i = 0; i < event.size(); ++i) { // Loop through sections of event.
                 for (size_t j = 0; j < excl.size(); ++j) { // Loop through exclusions.
                     if (excl.at(j).intersects(event.getSection(i))) {
-                        std::cout << "Unable to attend event with \033[0;36mid\033[0m "
+                        std::cout << "\nUnable to attend class with \033[0;36mid\033[0m "
                             << selection.id << " due to exclusions." << std::endl;
                         conflict = true;
                         break;
@@ -244,7 +253,7 @@ class Application
         }
 
         if (build.size() == 0) {
-            std::cout << "You have \033[0;36mno\033[0m selections after exclusions."
+            std::cout << "\nYou have \033[0;36mno\033[0m selections after exclusions."
                 << std::endl;
             return;
         }
@@ -268,6 +277,7 @@ class Application
                     << tag_list.at(section_id) << std::endl;
             }
         }
+        std::cout << std::endl;
     }
 
     /**
@@ -332,14 +342,14 @@ class Application
     void PrintHelp()
     {
         std::cout <<
-            "Available options:\n"
+            "\nAvailable options:\n"
             "  (h|H)  show this \033[0;36mhelp\033[0m menu\n"
             "  (b|B)  \033[0;36mbuild\033[0m optimal/near-optimal schedule\n"
-            "  (s|S)  \033[0;36msearch\033[0m for events\n"
-            "  (l|L)  \033[0;36mlist\033[0m currently selected events\n"
+            "  (s|S)  \033[0;36msearch\033[0m for classes\n"
+            "  (l|L)  \033[0;36mlist\033[0m currently selected classes\n"
             "  (q|Q)  \033[0;36mquit\033[0m the application\n"
             "  (e|E)  \033[0;36mexclude\033[0m a time interval\n"
-            "  (1-9)  add a class by \033[0;36mid\033[0m to selected events\n";
+            "  (1-9)  \033[0;36madd\033[0m a class by id number\n\n";
     }
 
     /**
@@ -432,7 +442,7 @@ public:
     int Run(bool verbose = true)
     {
         /* LOAD CATALOGUE */
-        if (verbose) std::cout << "Loading catalogue...";
+        if (verbose) std::cout << "\nLoading catalogue...";
         if (cat.load("data/nd_courses_2021.json") == EXIT_FAILURE) {
             std::cout << "Error loading catalogue!" << std::endl;
             return EXIT_FAILURE;
@@ -462,10 +472,18 @@ std::ostream& displayTimes(const IntervalGroup& igroup) {
 	for (size_t i = 0; i < igroup.getIntervalSize(); ++i) {
         int minutes = (int)igroup.getInterval((unsigned int)i).first % 1440 % 60;
         int hours = (int)igroup.getInterval((unsigned int)i).first % 1440 / 60;
-        std::string ampm = hours < 12 ? "AM" : "PM";
+        hours = hours > 12 ? hours - 12 : hours;
+        std::string ampm = hours < 12 ? "AM" : "PM"; 
+        ampm = minutes == 0 ? ampm = "0 " + ampm : " " + ampm; 
+
+        int minutes2 = (int)igroup.getInterval((unsigned int)i).second % 1440 % 60;
+        int hours2 = (int)igroup.getInterval((unsigned int)i).second % 1440 / 60;
+        hours2 = hours2 > 12 ? hours2 - 12 : hours2;
+        std::string ampm2 = hours < 12 ? "AM" : "PM";
+        ampm2 = minutes2 == 0 ? ampm2 = "0 " + ampm2 : " " + ampm2; 
 
 		std::cout << "[" << weekdays.at(((int)igroup.getInterval((unsigned int)i).first / 1440)) << ": " << hours << ":" << minutes << ampm << " - " <<
-			igroup.getInterval((unsigned int)i).second << "]";
+			hours2 << ":" << minutes2 << ampm2 << "]";
 		
 		if (i != igroup.getIntervalSize() - 1) {
 			std::cout << ", ";
