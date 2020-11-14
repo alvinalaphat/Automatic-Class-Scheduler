@@ -35,6 +35,13 @@ def getFunction(funcInfo, name):
         except ValueError:
             pass
 
+def getTopFunctions(fi, n = 5):
+    fi.sort(key = lambda s: s['self'], reverse=True)
+    if len(fi) < n:
+        return fi
+    
+    return fi[:n]
+
 def perfTest(E, s, M):
     testProcess = subprocess.Popen(['./exe/EventSchedulerPerfTest', str(E), str(s), str(M)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     testProcess.wait()
@@ -48,7 +55,7 @@ def perfTest(E, s, M):
         if fInfo is not None:
             funcInfo.append(fInfo)
 
-    return getFunction(funcInfo, 'sectionConflictsWithSchedule')
+    return funcInfo
 
 tests = [
     [100, 5, 1000],
@@ -70,5 +77,12 @@ for test in tests:
     #print(f"E = {test[0]}, s = {test[1]}, M = {test[2]}")
 
     results = perfTest(test[0], test[1], test[2])
-    
+
+    #print(test[0], test[1], test[2], ':')
+    #results = getTopFunctions(results)
+    #for result in results:
+    #    print('\t', result)
+
+
+    results = getFunction(results, 'sectionConflictsWithSchedule')
     print(test[0], test[1], test[2], results['self'], results['percent'], results['calls'], sep='\t')

@@ -79,10 +79,35 @@ void EventScheduler::addEvent(const Event& event, unsigned int id, double weight
 	this -> events.insert({id, event});
 	this -> eventSectionsStartIndex.insert({id, this -> sections.size()});
 	for (unsigned int i = 0; i < event.size(); ++i) {
-		this -> sections.push_back({id, i});
+		this -> sections.push_back({id, i, this -> events[id].getSectionPtr(i)});
 	}
-	this -> addConflicts(event);
+	//this -> addConflicts(event);
 }
+
+// buildConflicts
+// generate the conflicts graph all at once
+void EventScheduler::buildConflicts() {
+
+	size_t nSections = this -> sections.size();
+	this -> conflicts.clear();
+	this -> conflicts.reserve(nSections);
+
+	for (size_t i = 0; i < nSections; ++i) {
+		std::vector<bool> sectionConflicts(nSections, false);
+		auto section = this -> sections[i].section;
+
+		for (size_t j = 0; j < i; ++j) {
+			sectionConflicts[j] = this -> conflicts[j][i];
+		}
+		sectionConflicts[i] = true;
+		for (size_t j = i + 1; j < nSections; ++j) {
+			sectionConflicts[j] = section -> intersects(*this -> sections[j].section);
+		}
+
+		this -> conflicts.push_back(sectionConflicts);
+	}
+}
+
 
 // addConflicts
 // mark the conflicts between each section of an event and all other sections
@@ -100,8 +125,8 @@ void EventScheduler::addConflicts(const Event& event) {
 		for (unsigned int otherSecID = 0; otherSecID < this -> conflicts.size();
 			++otherSecID) {
 
-			int eventID = this -> sections[otherSecID].first;
-			unsigned int otherSecI = this -> sections[otherSecID].second;
+			int eventID = this -> sections[otherSecID].eventID;
+			unsigned int otherSecI = this -> sections[otherSecID].sectionIndex;
 			
 			// mark whether or not there is a conflict in both locations of the
 			// adjacency graph
@@ -136,16 +161,21 @@ void EventScheduler::display(std::ostream& os) const {
 			os << "\t\tTimes: " << event.getSection(i) << std::endl;
 
 			// list each conflict in format Event XXX Section XXX
+			if (this -> conflicts.size() == 0) {
+				continue;
+			}
+
 			SectionID secID = this -> getSectionID(eventID, i);
+			std::cout << secID << std::endl;
 			os << "\t\tConflicts: ";
 			for (SectionID conflictID = 0;
 				conflictID < this -> conflicts.at(secID).size();
 				++conflictID) {
 				
-				if (conflicts.at(secID).at(conflictID)) {
-					int conflictEventID = this -> sections[conflictID].first;
+				if (this -> conflicts.at(secID).at(conflictID)) {
+					int conflictEventID = this -> sections[conflictID].eventID;
 					unsigned int conflictSectionID =
-						this -> sections[conflictID].second;
+						this -> sections[conflictID].sectionIndex;
 
 					os << "Event " << conflictEventID << " Section "
 						<< conflictSectionID << ", ";
@@ -163,8 +193,10 @@ void EventScheduler::display(std::ostream& os) const {
 // first the event id and second the section index
 // This is effectively a brute force attempt to find the independent set of the
 // conflicts graph that has the largest combined weight
-std::vector<std::pair<unsigned int, unsigned int>> EventScheduler::buildOptimalSchedule()
-	const {
+std::vector<std::pair<unsigned int, unsigned int>> EventScheduler::buildOptimalSchedule() {
+
+	this -> buildConflicts();
+	std::cout << "blah" << std::endl;
 
 	// copy the unscheduled events so that we don't overwrite the class member
 	auto unscheduled = this -> eventsToSchedule;
@@ -235,8 +267,8 @@ std::vector<std::pair<unsigned int, unsigned int>> EventScheduler::buildOptimalS
 	for (SectionID secID: schedules[bestIndex].sched) {
 		
 		retSched.push_back({
-			this -> sections.at(secID).first,
-			this -> sections.at(secID).second
+			this -> sections.at(secID).eventID,
+			this -> sections.at(secID).sectionIndex
 		});
 	}
 
@@ -247,7 +279,9 @@ std::vector<std::pair<unsigned int, unsigned int>> EventScheduler::buildOptimalS
 // use the same technique as buildOptimalSchedule, but limit the number of
 // schedules under consideration every round
 std::vector<std::pair<unsigned int, unsigned int>> EventScheduler::buildApproxSchedule(
-	unsigned int maxConsidered) const {
+	unsigned int maxConsidered) {
+
+	this -> buildConflicts();
 
 	// copy the unscheduled events so that we don't overwrite the class member
 	auto unscheduled = this -> eventsToSchedule;
@@ -309,8 +343,8 @@ std::vector<std::pair<unsigned int, unsigned int>> EventScheduler::buildApproxSc
 	for (SectionID secID: schedules.getElements()[bestIndex].sched) {
 		
 		retSched.push_back({
-			this -> sections.at(secID).first,
-			this -> sections.at(secID).second
+			this -> sections.at(secID).eventID,
+			this -> sections.at(secID).sectionIndex
 		});
 	}
 

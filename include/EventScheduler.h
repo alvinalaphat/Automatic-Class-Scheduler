@@ -52,19 +52,26 @@ class EventScheduler {
 		std::priority_queue<EventWrapper> eventsToSchedule;
 
 		// a mapping from events ids to events
-		std::unordered_map<int, Event> events;
+		std::unordered_map<unsigned int, Event> events;
 
 		// a list of sections; you lookup a section based on its sectionID and
 		// get its event id and section index
-		std::vector<std::pair<int, unsigned int>> sections;
+		struct SectionWrapper {
+			unsigned int eventID;
+			unsigned int sectionIndex;
+			const IntervalGroup * section;
+		};
+		std::vector<SectionWrapper> sections;
 
 		// a mapping from event ids to their locations in the sections list
-		std::unordered_map<int, size_t> eventSectionsStartIndex;
+		std::unordered_map<unsigned int, size_t> eventSectionsStartIndex;
 
 		// adjacency matrix of conflicts between sections; sections are
 		std::vector<std::vector<bool>> conflicts;
 
 		void addConflicts(const Event& event);
+
+		void buildConflicts();
 
 	public:
 		EventScheduler();
@@ -73,9 +80,10 @@ class EventScheduler {
 
 		void display(std::ostream& os) const;
 
-		std::vector<std::pair<unsigned int, unsigned int>> buildOptimalSchedule() const;
+		std::vector<std::pair<unsigned int, unsigned int>>
+			buildOptimalSchedule();
 		std::vector<std::pair<unsigned int, unsigned int>> buildApproxSchedule(
-			unsigned int maxConsidered = 1000) const;
+			unsigned int maxConsidered = 1000);
 };
 
 #endif // EVENT_SCHEDULER_H
