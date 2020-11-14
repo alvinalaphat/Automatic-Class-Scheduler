@@ -51,9 +51,9 @@ class Application
     void PrintWelcomeMessage()
     {
         std::cout <<
-            "COOL                      YES                    PLACEHOLDER\n"
-            "    SCHEDULING       THING   INDEED     CERTAINLY           TEXT\n"
-            "              PROJECT               MOST\n";
+            "WELCOME     TO         CLASS      SCHEDULER\n"
+            "                                           \n"
+            "-------------------------------------------\n";
         std::cout << "There are \033[0;36m" << cat.size() << "\033[0m events available." << std::endl;
         std::cout << "(Enter (h|H) to show the help menu.)" << std::endl;
     }
@@ -260,9 +260,9 @@ class Application
         for (const auto& [entry_id, section_id] : result) {
             std::cout << "  " << cat.at(entry_id).name << std::endl;
 
-            std::cout << "    times: " << cat.at(entry_id).event.getSection(section_id)
-                << std::endl;
-
+            std::cout << "    times: ";
+            displayTimes(cat.at(entry_id).event.getSection(section_id));
+            std::cout << std::endl;
             for (const auto& [tag, tag_list] : cat.at(entry_id).tags) {
                 std::cout << "    " << tag << ": "
                     << tag_list.at(section_id) << std::endl;
@@ -445,6 +445,36 @@ public:
 
         return EXIT_SUCCESS;
     }
+
+
+// friend ostream output operator
+std::ostream& displayTimes(const IntervalGroup& igroup) {
+    
+    std::unordered_map<int, std::string> weekdays = 
+    {
+        {0, "Monday"},
+        {1, "Tuesday"},
+        {2, "Wednesday"},
+        {3, "Thursday"},
+        {4, "Friday"},
+    };
+
+	for (size_t i = 0; i < igroup.getIntervalSize(); ++i) {
+        int minutes = (int)igroup.getInterval((unsigned int)i).first % 1440 % 60;
+        int hours = (int)igroup.getInterval((unsigned int)i).first % 1440 / 60;
+        std::string ampm = hours < 12 ? "AM" : "PM";
+
+		std::cout << "[" << weekdays.at(((int)igroup.getInterval((unsigned int)i).first / 1440)) << ": " << hours << ":" << minutes << ampm << " - " <<
+			igroup.getInterval((unsigned int)i).second << "]";
+		
+		if (i != igroup.getIntervalSize() - 1) {
+			std::cout << ", ";
+		}
+	}
+
+	return std::cout;
+}
+
 
     /* ---------------------------------------------------------------- */
 

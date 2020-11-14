@@ -18,6 +18,8 @@ class IntervalGroup {
 
 		friend std::ostream& operator<<(std::ostream& os,
 			const IntervalGroup& igroup);
+        std::pair<double, double> getInterval(unsigned int index) const;
+        unsigned int getIntervalSize() const;
 
 };
 

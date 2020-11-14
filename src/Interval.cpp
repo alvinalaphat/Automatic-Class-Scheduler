@@ -48,6 +48,14 @@ bool IntervalGroup::intersects(const IntervalGroup& igroup) const {
 	return false;
 }
 
+std::pair<double, double> IntervalGroup::getInterval(unsigned int index) const {
+    return this->intervals.at(index);
+}
+
+unsigned int IntervalGroup::getIntervalSize() const {
+    return (unsigned int)this->intervals.size();
+}
+
 // friend ostream output operator
 std::ostream& operator<<(std::ostream& os, const IntervalGroup& igroup) {
 	for (size_t i = 0; i < igroup.intervals.size(); ++i) {
