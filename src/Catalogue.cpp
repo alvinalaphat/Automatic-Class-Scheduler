@@ -11,7 +11,6 @@
 #include <math.h>
 #include <algorithm>
 #include <cmath>
-
 /* ---------------------------------------------------------------------- */
 
 
@@ -108,6 +107,7 @@ double Catalogue::tfidf(
 
 int Catalogue::load(std::string json_filename)
 {
+/*
     std::unordered_map<int, string> weekdays = 
     {
         {0: "Monday"},
@@ -116,7 +116,7 @@ int Catalogue::load(std::string json_filename)
         {3: "Thursday"},
         {4: "Friday"},
     };
-
+*/
     // read file into json if possible
     std::ifstream file(json_filename);
     if (not file.is_open()) {
@@ -136,13 +136,13 @@ int Catalogue::load(std::string json_filename)
 
         // parse interval groups to put into secs
         for (size_t k = 0; k < js.at(i).at("times").size(); ++k) {
-            std::vector<std::pair<string, string>> intervals;
+            std::vector<std::pair<double, double>> intervals;
             // for each interval group, grab its times during the week
             for (size_t a = 0; a < js.at(i).at("times").at(k).size(); ++a) {
-                std::vector<std::pair<string, string>> timeShift;
-                timeShift.first = weekdays.at(floor(js.at(i).at("times").at(k).at(a).get<std::pair<double, double>>().first / 1440));
-                timeShift.second = to_string(js.at(i).at("times").at(k).at(a).get<std::pair<double, double>>().first % 1440) + to_string(js.at(i).at("times").at(k).at(a).get<std::pair<double, double>>().second % 1440);
-                intervals.push_back(timeShift);
+                //std::vector<std::pair<string, string>> timeShift;
+                //timeShift.first = weekdays.at(floor(js.at(i).at("times").at(k).at(a).get<std::pair<double, double>>().first / 1440));
+                //timeShift.second = to_string(js.at(i).at("times").at(k).at(a).get<std::pair<double, double>>().first % 1440) + to_string(js.at(i).at("times").at(k).at(a).get<std::pair<double, double>>().second % 1440);
+                intervals.push_back(js.at(i).at("times").at(k).at(a).get<std::pair<double, double>>());
             }
             secs.push_back(intervals);
         }
