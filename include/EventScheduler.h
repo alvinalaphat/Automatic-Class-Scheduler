@@ -13,7 +13,7 @@ class EventScheduler {
 	private:
 
 		// a unique idetifier for a particular section of an event 
-		typedef uint64_t SectionID;
+		typedef size_t SectionID;
 
 		SectionID getSectionID(int eventID, unsigned int sectionIndex) const;
 
@@ -54,12 +54,17 @@ class EventScheduler {
 		// a mapping from events ids to events
 		std::unordered_map<int, Event> events;
 
-		// effectively a graph of which sections of events conflict with one
-		// another; if conflicts[section1ID] contains section2ID, then there
-		// is a conflict
-		std::unordered_map<SectionID, std::unordered_set<SectionID>> conflicts;
+		// a list of sections; you lookup a section based on its sectionID and
+		// get its event id and section index
+		std::vector<std::pair<int, unsigned int>> sections;
 
-		void addConflicts(int id, const Event& event);
+		// a mapping from event ids to their locations in the sections list
+		std::unordered_map<int, size_t> eventSectionsStartIndex;
+
+		// adjacency matrix of conflicts between sections; sections are
+		std::vector<std::vector<bool>> conflicts;
+
+		void addConflicts(const Event& event);
 
 	public:
 		EventScheduler();
@@ -69,7 +74,8 @@ class EventScheduler {
 		void display(std::ostream& os) const;
 
 		std::vector<std::pair<int, unsigned int>> buildOptimalSchedule() const;
-		std::vector<std::pair<int, unsigned int>> buildApproxSchedule() const;
+		std::vector<std::pair<int, unsigned int>> buildApproxSchedule(
+			unsigned int maxConsidered = 0) const;
 };
 
 #endif // EVENT_SCHEDULER_H

@@ -3,14 +3,15 @@
 #include "TopElemsHeap.h"
 
 // EventScheduler constructor
-EventScheduler::EventScheduler() : eventsToSchedule(), events(), conflicts() {}
+EventScheduler::EventScheduler() : eventsToSchedule(), events(), sections(),
+	eventSectionsStartIndex(), conflicts() {}
 
 // getSectionID
 // produce the sectionID for an section given its eventID and section index
 EventScheduler::SectionID EventScheduler::getSectionID(int eventID,
 	unsigned int sectionIndex) const {
-
-	return ((SectionID)eventID << 32) | (SectionID)sectionIndex;
+	
+	return this -> eventSectionsStartIndex.at(eventID) + sectionIndex;
 }
 
 // comparison operators for an EventWrapper so that it can be used in a priority
@@ -35,18 +36,17 @@ bool EventScheduler::ScheduleWrapper::operator==(const ScheduleWrapper& rhs) con
 // determine whether adding a section to sched would cause a time conflict
 bool EventScheduler::sectionConflictsWithSchedule(Schedule& sched,
 	SectionID sec) const {
-	
-	// examine the this -> conflicts graph; if there is an edge between any
-	// node of in sched and the sec node, return that there is a conflict
-	auto& sectionConflicts = this -> conflicts.at(sec);
+
+	const std::vector<bool>& sectionConflicts = this -> conflicts.at(sec);
 	for (SectionID schedSec: sched) {
-		if (sectionConflicts.contains(schedSec)) {
+		if (sectionConflicts[schedSec]) {
 			return true;
 		}
 	}
 
 	return false;
 }
+
 
 // comparison operators for an EventWrapper so that it can be used in a priority
 // queue
@@ -76,44 +76,46 @@ void EventScheduler::addEvent(const Event& event, int id, double weight) {
 	// add the event to the priority queue and id lookup table, and find its
 	// conflicts with other events
 	this -> eventsToSchedule.push({id, event, weight});
-	this -> addConflicts(id, event);
 	this -> events.insert({id, event});
+	this -> eventSectionsStartIndex.insert({id, this -> sections.size()});
+	for (unsigned int i = 0; i < event.size(); ++i) {
+		this -> sections.push_back({id, i});
+	}
+	this -> addConflicts(event);
 }
 
 // addConflicts
 // mark the conflicts between each section of an event and all other sections
 // of the event
-void EventScheduler::addConflicts(int id, const Event& event) {
-	
+void EventScheduler::addConflicts(const Event& event) {
+
 	// iterate through each section of the event
 	for (unsigned int secI = 0; secI < event.size(); ++secI) {
-		SectionID sectionID = this -> getSectionID(id, secI);
 		IntervalGroup section = event.getSection(secI);
 
 		// this section's list of other sections that conflict with it
-		std::unordered_set<SectionID> sectionConflicts;
+		std::vector<bool> sectionConflicts;
 
-		// check for conflicts against every other event section
-		for (auto &otherEvent: this -> events) {
-			for (unsigned int sec2I = 0; sec2I < otherEvent.second.size();
-				++ sec2I) {
-				
-				// if there is a conflict, mark it in the conflicts graph going
-				// both directions
-				if (section.intersects(
-					otherEvent.second.getSection(sec2I)
-				)) {
-					SectionID section2ID =
-						this -> getSectionID(otherEvent.first, sec2I);
-					
-					this -> conflicts[section2ID].insert(sectionID);
-					sectionConflicts.insert(section2ID);
-				}
+		// check for conflicts against eveyr ohter section
+		for (unsigned int otherSecID = 0; otherSecID < this -> conflicts.size();
+			++otherSecID) {
+
+			int eventID = this -> sections[otherSecID].first;
+			unsigned int otherSecI = this -> sections[otherSecID].second;
+			
+			// mark whether or not there is a conflict in both locations of the
+			// adjacency graph
+			bool isConflict = false;
+			if (section.intersects(
+				this -> events.at(eventID).getSection(otherSecI)
+			)) {
+				isConflict = true;
 			}
+			this -> conflicts[otherSecID].push_back(isConflict);
+			sectionConflicts.push_back(isConflict);
 		}
 
-		// add the sectionID to the list of conflicts
-		this -> conflicts.insert({sectionID, sectionConflicts});
+		this -> conflicts.push_back(sectionConflicts);
 	}
 }
 
@@ -136,12 +138,18 @@ void EventScheduler::display(std::ostream& os) const {
 			// list each conflict in format Event XXX Section XXX
 			SectionID secID = this -> getSectionID(eventID, i);
 			os << "\t\tConflicts: ";
-			for (auto conflictID: this -> conflicts.at(secID)) {
-				int conflictEventID = (int)(conflictID >> 32);
-				unsigned int conflictSectionID = (unsigned int)conflictID;
+			for (SectionID conflictID = 0;
+				conflictID < this -> conflicts.at(secID).size();
+				++conflictID) {
+				
+				if (conflicts.at(secID).at(conflictID)) {
+					int conflictEventID = this -> sections[conflictID].first;
+					unsigned int conflictSectionID =
+						this -> sections[conflictID].second;
 
-				os << "Event " << conflictEventID << " Section "
-					<< conflictSectionID << ", ";
+					os << "Event " << conflictEventID << " Section "
+						<< conflictSectionID << ", ";
+				}
 			}
 			os << std::endl;
 		}
@@ -196,8 +204,6 @@ std::vector<std::pair<int, unsigned int>> EventScheduler::buildOptimalSchedule()
 
 		// augment the schedules already made with the new ones
 		schedules.insert(schedules.end(), newSchedules.begin(), newSchedules.end());
-
-		std::cout << schedules.size() <<std::endl;
 	}
 
 	// debugging -- print candidate schedules
@@ -228,7 +234,10 @@ std::vector<std::pair<int, unsigned int>> EventScheduler::buildOptimalSchedule()
 	std::vector<std::pair<int, unsigned int>> retSched;
 	for (SectionID secID: schedules[bestIndex].sched) {
 		
-		retSched.push_back({(int)(secID >> 32), (unsigned int)secID});
+		retSched.push_back({
+			this -> sections.at(secID).first,
+			this -> sections.at(secID).second
+		});
 	}
 
 	return retSched;
@@ -237,15 +246,15 @@ std::vector<std::pair<int, unsigned int>> EventScheduler::buildOptimalSchedule()
 // buildApproxSchedule
 // use the same technique as buildOptimalSchedule, but limit the number of
 // schedules under consideration every round
-std::vector<std::pair<int, unsigned int>> EventScheduler::buildApproxSchedule()
-	const {
+std::vector<std::pair<int, unsigned int>> EventScheduler::buildApproxSchedule(
+	unsigned int maxConsidered) const {
 
 	// copy the unscheduled events so that we don't overwrite the class member
 	auto unscheduled = this -> eventsToSchedule;
 
 	// 
 	//std::vector<ScheduleWrapper> schedules = {{0, {}}};
-	TopElemsHeap<ScheduleWrapper> schedules(1000);
+	TopElemsHeap<ScheduleWrapper> schedules(maxConsidered);
 	schedules.push({0, {}});
 
 	while (!unscheduled.empty()) {
@@ -279,7 +288,6 @@ std::vector<std::pair<int, unsigned int>> EventScheduler::buildApproxSchedule()
 		}
 
 		// augment the schedules already made with the new ones
-		//schedules.insert(schedules.end(), newSchedules.begin(), newSchedules.end());
 		for (auto& schedule: newSchedules) {
 			schedules.push(schedule);
 		}
@@ -300,7 +308,10 @@ std::vector<std::pair<int, unsigned int>> EventScheduler::buildApproxSchedule()
 	std::vector<std::pair<int, unsigned int>> retSched;
 	for (SectionID secID: schedules.getElements()[bestIndex].sched) {
 		
-		retSched.push_back({(int)(secID >> 32), (unsigned int)secID});
+		retSched.push_back({
+			this -> sections.at(secID).first,
+			this -> sections.at(secID).second
+		});
 	}
 
 	return retSched;
