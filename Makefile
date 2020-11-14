@@ -8,14 +8,20 @@ EXE := exe
 
 PP := g++
 
-CFLAGS := -O0 -g -Wall -Wextra -Wconversion -Wshadow -pedantic -Werror -I$(INC)
+ifeq ($(MICR_PRET_PROJ_PERF_TEST_FLAG), 1)
+	PERF_TEST_FLAG := -pg
+else
+	PERF_TEST_FLAG := 
+endif
+
+CFLAGS := -O2 -g $(PERF_TEST_FLAG) -Wall -Wextra -Wconversion -Wshadow -pedantic -Werror -I$(INC)
 CXXFLAGS := -m64 -std=c++2a -Weffc++ $(CFLAGS)
 
 # make all
 all: jsonTest CatalogueTest IntervalTest TopElemsHeapTest EventSchedulerTest 
 
 # general include dependencies
-DEPS := $(INC)/Interval.h $(INC)/Event.h $(INC)/EventScheduler.h $(INC)/TopElemsHeap.h $(INC)/json.hpp $(INC)/Catalogue.hpp
+DEPS := $(INC)/Interval.h $(INC)/Event.h $(INC)/EventScheduler.h $(INC)/TopElemsHeap.h $(INC)/json.h $(INC)/Catalogue.h
 
 # make JSONTest
 jsonTestObjs := $(OBJ)/jsonTest.o
@@ -27,7 +33,7 @@ $(EXE)/jsonTest: $(jsonTestObjs)
 	$(PP) $^ -o $@ $(CXXFLAGS)
 
 # make CatalogueTest
-CatalogueTestObjs := $(OBJ)/CatalogueTest.o
+CatalogueTestObjs := $(OBJ)/CatalogueTest.o $(OBJ)/Catalogue.o $(OBJ)/Interval.o $(OBJ)/Event.o
 
 CatalogueTest: $(EXE)/CatalogueTest
 	$(EXE)/./CatalogueTest
@@ -53,6 +59,15 @@ EventSchedulerTest: $(EXE)/EventSchedulerTest
 $(EXE)/EventSchedulerTest: $(EventSchedulerTestObjs)
 	$(PP) $^ -o $@ $(CXXFLAGS)
 
+# make EventSchedulerPerfTest
+EventSchedulerPerfTestObjs := $(OBJ)/EventSchedulerPerfTest.o $(OBJ)/Interval.o $(OBJ)/Event.o $(OBJ)/EventScheduler.o
+
+EventSchedulerPerfTest: $(EXE)/EventSchedulerPerfTest
+	./$<
+
+$(EXE)/EventSchedulerPerfTest: $(EventSchedulerPerfTestObjs)
+	$(PP) $^ -o $@ $(CXXFLAGS)
+
 # make TopElemsHeapTest
 TopElemsHeapTestObjs := $(OBJ)/TopElemsHeapTest.o
 
@@ -74,4 +89,4 @@ initialize:
 clean:
 	rm -rf $(OBJ)/* $(EXE)/*
 
-.PHONY: all IntervalTest EventSchedulerTest TopElemsHeapTest initialize clean
+.PHONY: all IntervalTest EventSchedulerTest EventSchedulerPerfTest TopElemsHeapTest initialize clean
