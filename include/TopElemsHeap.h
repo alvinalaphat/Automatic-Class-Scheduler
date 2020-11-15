@@ -15,17 +15,22 @@ class TopElemsHeap {
         std::vector<T> elems;
 
     public:
+        struct Maybe {
+            bool some;
+            T value;
+        };
         
         TopElemsHeap(size_t n) : maxElems(n), elems() {}
 
-        void push(T value) {
+        bool push(T value, T * removed = NULL) {
 
             // do not even add the element if the heap is at capacity and the 
             // new value would be the smallest entry anyway
             if (this -> elems.size() >= this -> maxElems
                 && value <= this -> elems.front()) {
                 
-                return;
+                *removed = value;
+                return true;
             }
             
             this -> elems.push_back(value);
@@ -35,8 +40,17 @@ class TopElemsHeap {
             // smallest element
             if (this -> elems.size() > this -> maxElems) {
                 std::pop_heap(this -> elems.begin(), this -> elems.end(), std::greater());
+
+                if (removed != NULL) {
+                    *removed = this -> elems.back();
+                }
+
                 this -> elems.pop_back();
+
+                return true;
             }
+
+            return false;
         }
 
         const std::vector<T>& getElements() const {

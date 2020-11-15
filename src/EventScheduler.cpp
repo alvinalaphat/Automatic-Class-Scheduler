@@ -34,7 +34,7 @@ bool EventScheduler::ScheduleWrapper::operator==(const ScheduleWrapper& rhs) con
 
 // sectionConflictsWithSchedule
 // determine whether adding a section to sched would cause a time conflict
-bool EventScheduler::sectionConflictsWithSchedule(Schedule& sched,
+/*bool EventScheduler::sectionConflictsWithSchedule(Schedule& sched,
 	SectionID sec) const {
 
 	const std::vector<bool>& sectionConflicts = this -> conflicts.at(sec);
@@ -45,8 +45,7 @@ bool EventScheduler::sectionConflictsWithSchedule(Schedule& sched,
 	}
 
 	return false;
-}
-
+}*/
 
 // comparison operators for an EventWrapper so that it can be used in a priority
 // queue
@@ -64,6 +63,91 @@ bool EventScheduler::EventWrapper::operator>=(const EventWrapper& rhs) const {
 }
 bool EventScheduler::EventWrapper::operator==(const EventWrapper& rhs) const {
 	return this -> weight == rhs.weight;
+}
+
+EventScheduler::Schedule::Schedule() : section(-1), weight(0.0), parent(NULL),
+	prev(NULL), next(NULL), child(NULL), underConsideration(true) {}
+
+EventScheduler::Schedule::Schedule(SectionID secID) : section(secID),
+	weight(0.0), parent(NULL), prev(NULL), next(NULL), child(NULL),
+	underConsideration(true) {}
+
+void EventScheduler::Schedule::tryAddingSection(SectionID secID,
+	const std::vector<bool>& conflicts, std::vector<Schedule *>& newSchedules) {
+
+	// Check if this section conflicts with another section; if not, recursively
+	// try to add its children; always try with the root section (section==-1)
+	// since this doesn't represent a real section
+	if (this -> section == (SectionID)(-1) || !conflicts[this -> section]) {
+		if (this -> child != NULL) {
+			this -> child -> tryAddingSection(secID, conflicts, newSchedules);
+		}
+
+		if (this -> underConsideration) {
+
+			Schedule * newSchedule = new Schedule(secID);
+			newSchedule -> weight = this -> weight;
+			newSchedule -> parent = this;
+			newSchedules.push_back(newSchedule);
+
+		}
+	}
+
+	if (this -> next != NULL) {
+		this -> next -> tryAddingSection(secID, conflicts, newSchedules);
+	}
+}
+
+void EventScheduler::Schedule::insertOnParent() {
+	this -> next = this -> parent -> child;
+	if (this -> next != NULL) {
+		this -> next -> prev = this;
+	}
+	this -> parent -> child = this;
+}
+
+void EventScheduler::Schedule::remove() {
+	if (this -> child != NULL) {
+		this -> underConsideration = false;
+		return;
+	}
+
+	if (this -> prev == NULL) {
+		if (this -> next == NULL) {
+			this -> parent -> child = NULL;
+			if (!this -> parent -> underConsideration) {
+				this -> parent -> remove();
+			}
+		}
+		else {
+			this -> parent -> child = this -> next;
+			this -> next -> prev = NULL;
+		}
+	}
+	else {
+		this -> prev -> next = this -> next;
+		if (this -> next != NULL) {
+			this -> next -> prev = this -> prev;
+		}
+	}
+
+	delete this;
+}
+
+size_t EventScheduler::Schedule::size() {
+	size_t s = 1;
+	if (this -> underConsideration) {
+		//s += 1;
+	}
+
+	if (this -> next != NULL) {
+		s += this -> next -> size();
+	}
+	if (this -> child != NULL) {
+		s += this -> child -> size();
+	}
+
+	return s;
 }
 
 // addEvent
@@ -193,7 +277,7 @@ void EventScheduler::display(std::ostream& os) const {
 // first the event id and second the section index
 // This is effectively a brute force attempt to find the independent set of the
 // conflicts graph that has the largest combined weight
-std::vector<std::pair<unsigned int, unsigned int>> EventScheduler::buildOptimalSchedule() {
+/*std::vector<std::pair<unsigned int, unsigned int>> EventScheduler::buildOptimalSchedule() {
 
 	this -> buildConflicts();
 	std::cout << "blah" << std::endl;
@@ -238,19 +322,6 @@ std::vector<std::pair<unsigned int, unsigned int>> EventScheduler::buildOptimalS
 		schedules.insert(schedules.end(), newSchedules.begin(), newSchedules.end());
 	}
 
-	// debugging -- print candidate schedules
-	/*std::cout << "Potential schedules" << std::endl;
-	for (auto& sched: schedules) {
-		std::cout << "\tweight = " << sched.weight << ": ";
-
-		for (SectionID secID: sched.sched) {
-			std::cout << "Event " << (int)(secID >> 32) << " Section " <<
-				(unsigned int)(secID) << ", ";
-		}
-
-		std::cout << std::endl;
-	}*/
-
 	// find the best schedule
 	size_t bestIndex = 0;
 	double bestWeight = 0;
@@ -273,7 +344,7 @@ std::vector<std::pair<unsigned int, unsigned int>> EventScheduler::buildOptimalS
 	}
 
 	return retSched;
-}
+}*/
 
 // buildApproxSchedule
 // use the same technique as buildOptimalSchedule, but limit the number of
@@ -286,10 +357,13 @@ std::vector<std::pair<unsigned int, unsigned int>> EventScheduler::buildApproxSc
 	// copy the unscheduled events so that we don't overwrite the class member
 	auto unscheduled = this -> eventsToSchedule;
 
-	// 
-	//std::vector<ScheduleWrapper> schedules = {{0, {}}};
+	//TopElemsHeap<ScheduleWrapper> schedules(maxConsidered);
+	//schedules.push({0, {}});
+
+	Schedule * rootSchedule = new Schedule();
 	TopElemsHeap<ScheduleWrapper> schedules(maxConsidered);
-	schedules.push({0, {}});
+	schedules.push({0, rootSchedule});
+
 
 	while (!unscheduled.empty()) {
 
@@ -298,10 +372,38 @@ std::vector<std::pair<unsigned int, unsigned int>> EventScheduler::buildApproxSc
 		unscheduled.pop();
 
 		// a set of schedules where we have attempted to add the new section
-		std::vector<ScheduleWrapper> newSchedules;
+		std::vector<Schedule *> newSchedules;
 		
+		// attempt to add each section the event to the schedule
+		for (unsigned int i = 0; i < ew.event.size(); ++i) {
+			
+			SectionID secID = this -> getSectionID(ew.id, i);
+
+			rootSchedule -> tryAddingSection(secID, this -> conflicts[secID],
+				newSchedules);
+		}
+
+		for (Schedule * schedule: newSchedules) {
+			schedule -> insertOnParent();
+		}
+
+		std::cout << rootSchedule -> size() << std::endl;
+
+		int nRem = 0;
+		for (Schedule * schedule: newSchedules) {
+			double newWeight = (schedule -> weight += ew.weight);
+
+			ScheduleWrapper removed;
+			if (schedules.push({newWeight, schedule}, &removed)) {
+				removed.sched -> remove();
+				++nRem;
+			}
+		}
+
+		//std::cout << rootSchedule -> size() << std::endl <<std::endl;
+
 		// go through each schedule and attempt to modify it
-		for (auto schedule: schedules.getElements()) {
+		/*for (auto schedule: schedules.getElements()) {
 
 			// attempt to add each section the event to the schedule
 			for (unsigned int i = 0; i < ew.event.size(); ++i) {
@@ -319,34 +421,44 @@ std::vector<std::pair<unsigned int, unsigned int>> EventScheduler::buildApproxSc
 					newSchedules.push_back({newWeight, newSchedule});
 				}
 			}
-		}
+		}*/
 
 		// augment the schedules already made with the new ones
-		for (auto& schedule: newSchedules) {
+		/*for (auto& schedule: newSchedules) {
 			schedules.push(schedule);
-		}
+		}*/
 	}
 
-	// find the best schedule
-	size_t bestIndex = 0;
-	double bestWeight = 0;
-	for (size_t i = 0; i < schedules.getElements().size(); ++i) {
 
-		if (schedules.getElements()[i].weight > bestWeight) {
-			bestIndex = i;
-			bestWeight = schedules.getElements()[i].weight;
+
+	// find the best schedule
+	Schedule * bestSched = schedules.getElements().front().sched;
+	for (auto sched: schedules.getElements()) {
+		if (sched.sched -> weight < bestSched -> weight) {
+			bestSched = sched.sched;
 		}
 	}
 
 	// convert that schedule into the return format
 	std::vector<std::pair<unsigned int, unsigned int>> retSched;
-	for (SectionID secID: schedules.getElements()[bestIndex].sched) {
+	while (bestSched -> parent != NULL) {
+		
+		SectionID secID = bestSched -> section;
+		retSched.push_back({
+			this -> sections.at(secID).eventID,
+			this -> sections.at(secID).sectionIndex
+		});
+
+		bestSched = bestSched -> parent;
+	}
+
+	/*for (SectionID secID: schedules.getElements()[bestIndex].sched) {
 		
 		retSched.push_back({
 			this -> sections.at(secID).eventID,
 			this -> sections.at(secID).sectionIndex
 		});
-	}
+	}*/
 
 	return retSched;
 }

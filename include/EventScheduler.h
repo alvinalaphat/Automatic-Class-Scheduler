@@ -18,20 +18,9 @@ class EventScheduler {
 		SectionID getSectionID(unsigned int eventID, unsigned int sectionIndex) const;
 
 		// a collection of sections forms a schedule
-		typedef std::vector<SectionID> Schedule;
+		//typedef std::vector<SectionID> Schedule;
 
-		bool sectionConflictsWithSchedule(Schedule& sched, SectionID sec) const;
-
-		struct ScheduleWrapper {
-			double weight;
-			Schedule sched;
-			
-			bool operator<(const ScheduleWrapper& rhs) const;
-			bool operator>(const ScheduleWrapper& rhs) const;
-			bool operator<=(const ScheduleWrapper& rhs) const;
-			bool operator>=(const ScheduleWrapper& rhs) const;
-			bool operator==(const ScheduleWrapper& rhs) const;
-		};
+		//bool sectionConflictsWithSchedule(Schedule& sched, SectionID sec) const;
 
 		// A wrapper for an event object which makes it comparable by an
 		// associated weight
@@ -45,6 +34,43 @@ class EventScheduler {
 			bool operator<=(const EventWrapper& rhs) const;
 			bool operator>=(const EventWrapper& rhs) const;
 			bool operator==(const EventWrapper& rhs) const;
+		};
+
+		struct Schedule {
+			SectionID section;
+			double weight;
+
+			struct Schedule * parent;
+			struct Schedule * prev;
+			struct Schedule * next;
+			struct Schedule * child;
+
+			bool underConsideration;
+
+			// Constructors
+			Schedule();
+			Schedule(SectionID secID);
+
+			void tryAddingSection(SectionID secID,
+				const std::vector<bool>& conflicts,
+				std::vector<Schedule *>& newSchedules);
+
+			void insertOnParent();
+			
+			void remove();
+			
+			size_t size();
+		};
+
+		struct ScheduleWrapper {
+			double weight;
+			Schedule * sched;
+			
+			bool operator<(const ScheduleWrapper& rhs) const;
+			bool operator>(const ScheduleWrapper& rhs) const;
+			bool operator<=(const ScheduleWrapper& rhs) const;
+			bool operator>=(const ScheduleWrapper& rhs) const;
+			bool operator==(const ScheduleWrapper& rhs) const;
 		};
 
 		// priority queue for maintaining the order in which events should
@@ -80,8 +106,8 @@ class EventScheduler {
 
 		void display(std::ostream& os) const;
 
-		std::vector<std::pair<unsigned int, unsigned int>>
-			buildOptimalSchedule();
+		//std::vector<std::pair<unsigned int, unsigned int>>
+		//	buildOptimalSchedule();
 		std::vector<std::pair<unsigned int, unsigned int>> buildApproxSchedule(
 			unsigned int maxConsidered = 1000);
 };
