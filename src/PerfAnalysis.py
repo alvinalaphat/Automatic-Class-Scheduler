@@ -1,5 +1,6 @@
 
 import subprocess
+import time
 
 def parseLine(line):
     line = line.strip()
@@ -57,6 +58,40 @@ def perfTest(E, s, M):
 
     return funcInfo
 
+def timeTest(E, s, M):
+    t0 = time.time()
+
+    testProcess = subprocess.Popen(['./exe/EventSchedulerPerfTest', str(E), str(s), str(M)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    testProcess.wait()
+
+    totalTime = time.time() - t0
+
+    return totalTime
+
+def runTimingTests(tests):
+    print("E\ts\tM\ttime (s)")
+
+    for test in tests:
+        t = timeTest(test[0], test[1], test[2])
+        print(test[0], test[1], test[2], t, sep="\t")
+
+def runTopFunctions(tests):
+    for test in tests:
+        print(f"E = {test[0]}, s = {test[1]}, M = {test[2]}")
+        results = perfTest(test[0], test[1], test[2])
+        results = getTopFunctions(results)
+        for result in results:
+            print('\t', result)
+
+def runFunctionAnalysis(tests, funcName):
+    print("E\ts\tM\ttotal\t%\tcalls")
+    for test in tests:
+        results = perfTest(test[0], test[1], test[2])
+        results = getFunction(results, funcName)
+        print(test[0], test[1], test[2], results['self'], results['percent'], results['calls'], sep='\t')
+
+
+
 tests = [
     [100, 5, 1000],
     [200, 5, 1000],
@@ -72,17 +107,6 @@ tests = [
     [100, 5, 16000],
 ]
 
-print("E\ts\tM\ttotal\t%\tcalls")
-for test in tests:
-    #print(f"E = {test[0]}, s = {test[1]}, M = {test[2]}")
-
-    results = perfTest(test[0], test[1], test[2])
-
-    #print(test[0], test[1], test[2], ':')
-    #results = getTopFunctions(results)
-    #for result in results:
-    #    print('\t', result)
-
-
-    results = getFunction(results, 'sectionConflictsWithSchedule')
-    print(test[0], test[1], test[2], results['self'], results['percent'], results['calls'], sep='\t')
+runTimingTests(tests)
+#runTopFunctions(tests)
+#runFunctionAnalysis(tests, 'sectionConflictsWithSchedule')
