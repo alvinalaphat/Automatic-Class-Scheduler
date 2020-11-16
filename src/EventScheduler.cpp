@@ -1,10 +1,15 @@
 
 #include "EventScheduler.h" 
-#include "TopElemsHeap.h"
 
 // EventScheduler constructor
-EventScheduler::EventScheduler() : eventsToSchedule(), events(), sections(),
-	eventSectionsStartIndex(), conflicts() {}
+EventScheduler::EventScheduler(unsigned int maxEvents,
+	unsigned int maxSectionsPerEvent) :
+	eventsToSchedule(maxEvents),
+	events(),
+	sections(),
+	eventSectionsStartIndex(),
+	conflicts(),
+	maxSecPerEvent(maxSectionsPerEvent) {}
 
 // getSectionID
 // produce the sectionID for an section given its eventID and section index
@@ -79,13 +84,18 @@ void EventScheduler::addEvent(const Event& event, unsigned int id, double weight
 
 	// add the event to the priority queue and id lookup table, and find its
 	// conflicts with other events
-	this -> eventsToSchedule.push({id, event, weight});
+	EventWrapper eventToSchedule = {id, event, weight};
+	this -> eventsToSchedule.push(eventToSchedule);
 	this -> events.insert({id, event});
 	this -> eventSectionsStartIndex.insert({id, this -> sections.size()});
-	for (unsigned int i = 0; i < event.size(); ++i) {
+
+	// limit number of sections to meet perfomrance constraints
+	unsigned int nSections = event.size() < this -> maxSecPerEvent
+		? (unsigned int)event.size() 
+		: this -> maxSecPerEvent;
+	for (unsigned int i = 0; i < nSections; ++i) {
 		this -> sections.push_back({id, i, this -> events[id].getSectionPtr(i)});
 	}
-	//this -> addConflicts(event);
 }
 
 // buildConflicts
@@ -203,7 +213,11 @@ std::vector<std::pair<unsigned int, unsigned int>> EventScheduler::buildOptimalS
 	std::cout << "blah" << std::endl;
 
 	// copy the unscheduled events so that we don't overwrite the class member
-	auto unscheduled = this -> eventsToSchedule;
+	//auto unscheduled = this -> eventsToSchedule;
+	std::priority_queue<EventWrapper> unscheduled;
+	for (auto& unschedEvent: this -> eventsToSchedule.getElements()) {
+		unscheduled.push(unschedEvent);
+	}
 
 	std::vector<ScheduleWrapper> schedules = {{0, {}}};
 
@@ -293,16 +307,20 @@ std::vector<std::pair<unsigned int, unsigned int>> EventScheduler::buildApproxSc
 	this -> buildConflicts();
 
 	// copy the unscheduled events so that we don't overwrite the class member
-	auto unscheduled = this -> eventsToSchedule;
+	//auto unscheduled = this -> eventsToSchedule;
+	std::priority_queue<EventWrapper> unscheduled;
+	for (auto& unschedEvent: this -> eventsToSchedule.getElements()) {
+		unscheduled.push(unschedEvent);
+	}
 
-	// 
+	// initialize the schedules with an empty schedule
 	TopElemsHeap<ScheduleWrapper> schedules(maxConsidered);
 	ScheduleWrapper rootSchedule = {0, {}};
 	schedules.push(rootSchedule);
 
 	// a set of schedules where we have attempted to add the new section
 	std::vector<ScheduleWrapper> newSchedules;
-	newSchedules.reserve(25 * maxConsidered);
+	newSchedules.reserve(this -> maxSecPerEvent * maxConsidered);
 
 	while (!unscheduled.empty()) {
 

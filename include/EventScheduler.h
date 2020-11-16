@@ -5,6 +5,7 @@
 #include "Interval.h"
 #include "Event.h"
 #include "SharedVector.h"
+#include "TopElemsHeap.h"
 #include <unordered_map>
 #include <unordered_set>
 #include <queue>
@@ -51,7 +52,8 @@ class EventScheduler {
 
 		// priority queue for maintaining the order in which events should
 		// be attempted to be added to the schedule
-		std::priority_queue<EventWrapper> eventsToSchedule;
+		//std::priority_queue<EventWrapper> eventsToSchedule;
+		TopElemsHeap<EventWrapper> eventsToSchedule;
 
 		// a mapping from events ids to events
 		std::unordered_map<unsigned int, Event> events;
@@ -75,8 +77,11 @@ class EventScheduler {
 
 		void buildConflicts();
 
+		unsigned int maxSecPerEvent;
+
 	public:
-		EventScheduler();
+		EventScheduler(unsigned int maxEvents=50,
+			unsigned int maxSectionsPerEvent=20);
 		
 		void addEvent(const Event& event, unsigned int id, double weight = 1.0);
 
@@ -85,7 +90,7 @@ class EventScheduler {
 		std::vector<std::pair<unsigned int, unsigned int>>
 			buildOptimalSchedule();
 		std::vector<std::pair<unsigned int, unsigned int>> buildApproxSchedule(
-			unsigned int maxConsidered = 1000);
+			unsigned int maxConsidered = 500);
 };
 
 #endif // EVENT_SCHEDULER_H

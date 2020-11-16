@@ -15,7 +15,7 @@ int main(int argc, char ** argv) {
 
     /* ----------- Input that is poor for optimal scheduilng --------------- */
 
-    EventScheduler eventSched;
+    EventScheduler eventSched(E, s);
     for (int i = 0; i < E; ++i) {
         std::vector<IntervalGroup> sections;
         for (int j = 0; j < s; ++j) {
