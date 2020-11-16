@@ -38,8 +38,12 @@ bool EventScheduler::sectionConflictsWithSchedule(Schedule& sched,
 	SectionID sec) const {
 
 	const std::vector<bool>& sectionConflicts = this -> conflicts.at(sec);
-	for (SectionID schedSec: sched) {
-		if (sectionConflicts[schedSec]) {
+
+	const SectionID * secIDs = sched.getArray();
+	const size_t nSecIDs = sched.getSize();
+
+	for (size_t i = 0; i < nSecIDs; ++i) {
+		if (sectionConflicts[secIDs[i]]) {
 			return true;
 		}
 	}
@@ -201,7 +205,6 @@ std::vector<std::pair<unsigned int, unsigned int>> EventScheduler::buildOptimalS
 	// copy the unscheduled events so that we don't overwrite the class member
 	auto unscheduled = this -> eventsToSchedule;
 
-	// 
 	std::vector<ScheduleWrapper> schedules = {{0, {}}};
 
 	while (!unscheduled.empty()) {
@@ -227,7 +230,8 @@ std::vector<std::pair<unsigned int, unsigned int>> EventScheduler::buildOptimalS
 					
 					// create a new schedule and add it to our list
 					Schedule newSchedule = schedule.sched;
-					newSchedule.push_back(secID);
+					newSchedule.queue(secID);
+					newSchedule.flushQueue();
 					double newWeight = schedule.weight + ew.weight;
 					newSchedules.push_back({newWeight, newSchedule});
 				}
@@ -264,13 +268,18 @@ std::vector<std::pair<unsigned int, unsigned int>> EventScheduler::buildOptimalS
 
 	// convert that schedule into the return format
 	std::vector<std::pair<unsigned int, unsigned int>> retSched;
-	for (SectionID secID: schedules[bestIndex].sched) {
-		
+
+	Schedule bestSched = schedules[bestIndex].sched;
+	size_t nSections = bestSched.getSize();
+	const SectionID * secIDs = bestSched.getArray();
+	for (size_t i = 0; i < nSections; ++i) {
+		SectionID secID = secIDs[i];
 		retSched.push_back({
 			this -> sections.at(secID).eventID,
 			this -> sections.at(secID).sectionIndex
 		});
 	}
+
 
 	return retSched;
 }
@@ -287,9 +296,9 @@ std::vector<std::pair<unsigned int, unsigned int>> EventScheduler::buildApproxSc
 	auto unscheduled = this -> eventsToSchedule;
 
 	// 
-	//std::vector<ScheduleWrapper> schedules = {{0, {}}};
 	TopElemsHeap<ScheduleWrapper> schedules(maxConsidered);
-	schedules.push({0, {}});
+	ScheduleWrapper rootSchedule = {0, {}};
+	schedules.push(rootSchedule);
 
 	while (!unscheduled.empty()) {
 
@@ -314,7 +323,7 @@ std::vector<std::pair<unsigned int, unsigned int>> EventScheduler::buildApproxSc
 					
 					// create a new schedule and add it to our list
 					Schedule newSchedule = schedule.sched;
-					newSchedule.push_back(secID);
+					newSchedule.queue(secID);
 					double newWeight = schedule.weight + ew.weight;
 					newSchedules.push_back({newWeight, newSchedule});
 				}
@@ -324,6 +333,10 @@ std::vector<std::pair<unsigned int, unsigned int>> EventScheduler::buildApproxSc
 		// augment the schedules already made with the new ones
 		for (auto& schedule: newSchedules) {
 			schedules.push(schedule);
+		}
+
+		for (auto& schedule: schedules.getMutElements()) {
+			schedule.sched.flushQueue();
 		}
 	}
 
@@ -340,8 +353,12 @@ std::vector<std::pair<unsigned int, unsigned int>> EventScheduler::buildApproxSc
 
 	// convert that schedule into the return format
 	std::vector<std::pair<unsigned int, unsigned int>> retSched;
-	for (SectionID secID: schedules.getElements()[bestIndex].sched) {
-		
+
+	Schedule bestSched = schedules.getElements()[bestIndex].sched;
+	size_t nSections = bestSched.getSize();
+	const SectionID * secIDs = bestSched.getArray();
+	for (size_t i = 0; i < nSections; ++i) {
+		SectionID secID = secIDs[i];
 		retSched.push_back({
 			this -> sections.at(secID).eventID,
 			this -> sections.at(secID).sectionIndex

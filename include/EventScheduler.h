@@ -4,6 +4,7 @@
 
 #include "Interval.h"
 #include "Event.h"
+#include "SharedVector.h"
 #include <unordered_map>
 #include <unordered_set>
 #include <queue>
@@ -18,7 +19,8 @@ class EventScheduler {
 		SectionID getSectionID(unsigned int eventID, unsigned int sectionIndex) const;
 
 		// a collection of sections forms a schedule
-		typedef std::vector<SectionID> Schedule;
+		//typedef std::vector<SectionID> Schedule;
+		typedef SharedVector<SectionID> Schedule;
 
 		bool sectionConflictsWithSchedule(Schedule& sched, SectionID sec) const;
 

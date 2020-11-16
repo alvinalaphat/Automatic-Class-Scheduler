@@ -21,7 +21,7 @@ CXXFLAGS := -m64 -std=c++2a -Weffc++ $(CFLAGS)
 all: jsonTest CatalogueTest IntervalTest TopElemsHeapTest EventSchedulerTest 
 
 # general include dependencies
-DEPS := $(INC)/Interval.h $(INC)/Event.h $(INC)/EventScheduler.h $(INC)/TopElemsHeap.h $(INC)/json.h $(INC)/Catalogue.h
+DEPS := $(INC)/Interval.h $(INC)/Event.h $(INC)/EventScheduler.h $(INC)/TopElemsHeap.h $(INC)/json.h $(INC)/Catalogue.h $(INC)/SharedVector.h
 
 # make JSONTest
 jsonTestObjs := $(OBJ)/jsonTest.o
@@ -75,6 +75,15 @@ TopElemsHeapTest: $(EXE)/TopElemsHeapTest
 	./$<
 
 $(EXE)/TopElemsHeapTest: $(TopElemsHeapTestObjs)
+	$(PP) $^ -o $@ $(CXXFLAGS)
+
+# make SharedVectorTest
+SharedVectorTestObjs := $(OBJ)/SharedVectorTest.o
+
+SharedVectorTest: $(EXE)/SharedVectorTest
+	./$<
+
+$(EXE)/SharedVectorTest: $(SharedVectorTestObjs)
 	$(PP) $^ -o $@ $(CXXFLAGS)
 
 # general rule for making all object files

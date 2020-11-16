@@ -18,7 +18,7 @@ class TopElemsHeap {
         
         TopElemsHeap(size_t n) : maxElems(n), elems() {}
 
-        void push(T value) {
+        void push(T& value) {
 
             // do not even add the element if the heap is at capacity and the 
             // new value would be the smallest entry anyway
@@ -40,6 +40,10 @@ class TopElemsHeap {
         }
 
         const std::vector<T>& getElements() const {
+            return this -> elems;
+        }
+
+        std::vector<T>& getMutElements() {
             return this -> elems;
         }
 };
