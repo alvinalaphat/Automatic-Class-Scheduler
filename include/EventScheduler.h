@@ -17,14 +17,11 @@ class EventScheduler {
 		// a unique idetifier for a particular section of an event 
 		typedef size_t SectionID;
 
-		SectionID getSectionID(unsigned int eventID, unsigned int sectionIndex) const;
-
 		// a collection of sections forms a schedule
-		//typedef std::vector<SectionID> Schedule;
 		typedef SharedVector<SectionID> Schedule;
 
-		bool sectionConflictsWithSchedule(Schedule& sched, SectionID sec) const;
-
+		// A wrapper for schedules that make the comparable by associated
+		// weight
 		struct ScheduleWrapper {
 			double weight;
 			Schedule sched;
@@ -50,6 +47,20 @@ class EventScheduler {
 			bool operator==(const EventWrapper& rhs) const;
 		};
 
+		// a list of sections; you lookup a section based on its sectionID and
+		// get its event id and section index
+		struct SectionWrapper {
+			unsigned int eventID;
+			unsigned int sectionIndex;
+			const IntervalGroup * section;
+		};
+
+		SectionID getSectionID(unsigned int eventID, unsigned int sectionIndex) const;
+
+		bool sectionConflictsWithSchedule(Schedule& sched, SectionID sec) const;
+
+		void buildConflicts();
+
 		// priority queue for maintaining the order in which events should
 		// be attempted to be added to the schedule
 		//std::priority_queue<EventWrapper> eventsToSchedule;
@@ -58,13 +69,8 @@ class EventScheduler {
 		// a mapping from events ids to events
 		std::unordered_map<unsigned int, Event> events;
 
-		// a list of sections; you lookup a section based on its sectionID and
-		// get its event id and section index
-		struct SectionWrapper {
-			unsigned int eventID;
-			unsigned int sectionIndex;
-			const IntervalGroup * section;
-		};
+		// List of all the sections; a SectionID provides the index of the
+		// vector fo looking up the section
 		std::vector<SectionWrapper> sections;
 
 		// a mapping from event ids to their locations in the sections list
@@ -73,10 +79,7 @@ class EventScheduler {
 		// adjacency matrix of conflicts between sections; sections are
 		std::vector<std::vector<bool>> conflicts;
 
-		void addConflicts(const Event& event);
-
-		void buildConflicts();
-
+		// maximum number of sections considered per event
 		unsigned int maxSecPerEvent;
 
 	public:

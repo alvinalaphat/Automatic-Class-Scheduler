@@ -4,6 +4,7 @@
 
 int main() {
 
+    // create a TopElemsHeap that only keeps the top 10 elements
     TopElemsHeap<int> top10(10);
 
     std::vector<int> elems = {
@@ -12,6 +13,7 @@ int main() {
         47, 51, 51, 20, 82, 73, 49
     };
 
+    // add 30 elements, print the contents of top10 at each stage
     for (int i: elems) {
         top10.push(i);
 

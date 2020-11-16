@@ -10,14 +10,20 @@
 template<class T>
 class TopElemsHeap {
     private:
+        // the maximum size of the heap
         const size_t maxElems;
         
+        // the elemtns themselves, which are heapified after every operation
         std::vector<T> elems;
 
     public:
         
+        // constructor
         TopElemsHeap(size_t n) : maxElems(n), elems() {}
 
+        // push
+        // add a value to the heap; if the heap is already at capacity, the
+        // lowest element will be removed by this operaiton
         void push(T& value) {
 
             // do not even add the element if the heap is at capacity and the 
@@ -39,10 +45,14 @@ class TopElemsHeap {
             }
         }
 
+        // getElements
+        // return an immutable reference to the internal vector
         const std::vector<T>& getElements() const {
             return this -> elems;
         }
 
+        // getMutElements
+        // return a mutable reference to the internal vector
         std::vector<T>& getMutElements() {
             return this -> elems;
         }
