@@ -300,14 +300,15 @@ std::vector<std::pair<unsigned int, unsigned int>> EventScheduler::buildApproxSc
 	ScheduleWrapper rootSchedule = {0, {}};
 	schedules.push(rootSchedule);
 
+	// a set of schedules where we have attempted to add the new section
+	std::vector<ScheduleWrapper> newSchedules;
+	newSchedules.reserve(25 * maxConsidered);
+
 	while (!unscheduled.empty()) {
 
 		// remove highest priority event
 		EventWrapper ew = unscheduled.top();
 		unscheduled.pop();
-
-		// a set of schedules where we have attempted to add the new section
-		std::vector<ScheduleWrapper> newSchedules;
 		
 		// go through each schedule and attempt to modify it
 		for (auto schedule: schedules.getElements()) {
@@ -338,6 +339,8 @@ std::vector<std::pair<unsigned int, unsigned int>> EventScheduler::buildApproxSc
 		for (auto& schedule: schedules.getMutElements()) {
 			schedule.sched.flushQueue();
 		}
+
+		newSchedules.clear();
 	}
 
 	// find the best schedule
