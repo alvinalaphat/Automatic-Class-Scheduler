@@ -15,6 +15,7 @@ class Event {
 		
 		std::size_t size() const;
 		IntervalGroup getSection(std::size_t index) const;
+		const IntervalGroup * getSectionPtr(std::size_t index) const;
 
 		void display(std::ostream& os, const char * lineStart = "") const;
 };

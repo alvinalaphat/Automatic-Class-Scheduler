@@ -20,6 +20,12 @@ IntervalGroup Event::getSection(std::size_t index) const {
 	return this -> sections[index];
 }
 
+// getSectionPtr
+// get a pointer to a section of an event based on the index
+const IntervalGroup * Event::getSectionPtr(std::size_t index) const {
+	return &(this -> sections[index]);
+}
+
 // display
 // print an event and it's sections in human readable format; optionally specify
 // a string to print at the beginning of each line (intended to be used for
