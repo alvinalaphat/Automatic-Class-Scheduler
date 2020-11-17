@@ -299,7 +299,8 @@ public:
         for (const auto& entry : docs) {
             sim = cosine_similarity(q_tfidf, entry.tfidf);
             if (sim > threshold) {
-                heap.push({ entry.name, entry.data, sim });
+                ComparableEntry newEntry = { entry.name, entry.data, sim };
+                heap.push(newEntry);
             }
         }
 
