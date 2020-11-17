@@ -52,9 +52,9 @@ class Application
     {
         std::cout << std::endl;
         std::cout <<  
-            "\033[0;36m-------------------------------------------\n"
-            " Welcome     to      Class    Registration \n"
-            "-------------------------------------------\n\033[0m";
+            "\033[0;36m╔═════════════════════════════════════════╗\n"
+            " Welcome     to      Class    Registration\n"
+            "╚═════════════════════════════════════════╝\033[0m\n";
         std::cout << std::endl;
         std::cout << "There are \033[0;36m" << cat.size() << "\033[0m classes available." << std::endl;
         std::cout << "(Enter (h|H) to show the help menu.)" << std::endl;
@@ -101,6 +101,14 @@ class Application
         // Get query term, and search catalogue.
         std::string terms = GetResponse("Please enter \033[0;36msearch\033[0m term(s): ");
         auto results = cat.search(terms, 10);
+
+        // If no results, end early and spit out error.
+        if (results.size() == 0) {
+            std::cout << "There are \033[0;36mno\033[0m results for those search term(s)."
+                << std::endl;
+            return;
+        }
+
         std::cout << "\nShowing the top " << results.size() << " relevant results." << std::endl;
 
         // Find longest name, so we can adapt to length of name and avoid magic numbers.
@@ -149,8 +157,13 @@ class Application
         }
 
         // Parse priority.
-        std::string str_priority = GetResponse("Please enter an integral "
-            "\033[0;36mpriority\033[0m (larger means more preferred): ");
+        std::string str_priority;
+        
+        while (str_priority.empty() || !isdigit(str_priority.at(0))) {
+            str_priority = GetResponse("Please enter an integral "
+                "\033[0;36mpriority\033[0m (larger means more preferred): ");
+        }
+        
         double priority = ParseNumber<double>(str_priority);
 
         // Add to list of selections.
@@ -212,6 +225,8 @@ class Application
                     << '#' << std::setw(len) << i
                     << excl.at(i) << std::endl;
             }
+
+            std::cout << std::endl;
         }
     }
 
@@ -227,11 +242,6 @@ class Application
 
         std::list<std::tuple<size_t, double, Event>> build;
         
-        std::cout << std::endl;
-        std::cout << "\033[0;36m                    -------------------------------\n";
-        std::cout << "                     OPTIMAL     CLASS    SCHEDULE \n";
-        std::cout << "                    -------------------------------\n\n\033[0m";
-
         // Fill build.
         for (const auto& selection : sel) {
             const Event& event = cat.at(selection.id).event;
@@ -252,12 +262,6 @@ class Application
             }
         }
 
-        if (build.size() == 0) {
-            std::cout << "\nYou have \033[0;36mno\033[0m selections after exclusions."
-                << std::endl;
-            return;
-        }
-
         // No intersections in build!
         EventScheduler sched;
         for (const auto& [id, priority, event] : build) {
@@ -266,8 +270,23 @@ class Application
 
         // Print out result!
         auto result = sched.buildOptimalSchedule();
+
+        if (build.size() == 0) {
+            std::cout << "\nYour schedule is \033[0;36mempty\033[0m."
+                << std::endl << std::endl;
+            return;
+        }
+
+        // Print out header.
+        std::cout << std::endl;
+        std::cout <<
+        "                    \033[0;36m╔═════════════════════════════╗\n"
+        "                     OPTIMAL     CLASS    SCHEDULE\n"
+        "                    ╚═════════════════════════════╝\033[0m\n\n";
+
         for (const auto& [entry_id, section_id] : result) {
-            std::cout << "  " << cat.at(entry_id).name << std::endl;
+            std::cout << "  \033[0;36m'" << cat.at(entry_id).name << "'\033[0m"
+                << std::endl;
 
             std::cout << "    times: ";
             displayTimes(cat.at(entry_id).event.getSection(section_id));
@@ -439,7 +458,7 @@ public:
     /**
      *  @brief Called at main, essentially acting as main.
      */
-    int Run(bool verbose = true)
+    int Run(bool verbose = false)
     {
         /* LOAD CATALOGUE */
         if (verbose) std::cout << "\nLoading catalogue...";
