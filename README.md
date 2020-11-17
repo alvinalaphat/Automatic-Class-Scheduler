@@ -1,3 +1,3 @@
 # Microsoft-Preternship-Project
 
-Implementing High Level Data Structures to build an automatic class schedule optimizer
+Implementing high level data structures to build an automatic class schedule optimizer
