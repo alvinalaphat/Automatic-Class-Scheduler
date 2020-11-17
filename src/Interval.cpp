@@ -7,7 +7,10 @@ IntervalGroup::IntervalGroup() : intervals() {}
 
 // IntervalGroup constructor from a vector of times pairs
 IntervalGroup::IntervalGroup(const std::vector<std::pair<double, double>>& ints) :
-	intervals(ints) {}
+	intervals(ints) {
+	
+	std::sort(this -> intervals.begin(), this -> intervals.end());
+}
 
 // intersects
 // return whether an interval group intersects with another interval group
