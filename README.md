@@ -1,2 +1,3 @@
 # Microsoft-Preternship-Project
-team project using high level C++ data structures
+
+Implementing High Level Data Structures to build an automatic class schedule optimizer
