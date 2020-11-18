@@ -240,38 +240,42 @@ class Application
             return;
         }
 
-        std::list<std::tuple<size_t, double, Event>> build;
-        
-        // Fill build.
-        for (const auto& selection : sel) {
+        // add selections
+        EventScheduler sched;
+        for (const auto& selection: sel) {
             const Event& event = cat.at(selection.id).event;
-            bool conflict = false;
-            // Only add event if none of its sections intersect any of the exclusions.
-            for (size_t i = 0; i < event.size(); ++i) { // Loop through sections of event.
-                for (size_t j = 0; j < excl.size(); ++j) { // Loop through exclusions.
-                    if (excl.at(j).intersects(event.getSection(i))) {
-                        std::cout << "\nUnable to attend class with \033[0;36mid\033[0m "
-                            << selection.id << " due to exclusions." << std::endl;
-                        conflict = true;
-                        break;
-                    }
-                }
-            }
-            if (not conflict) {
-                build.push_back({ selection.id, selection.priority, event });
-            }
+
+            sched.addEvent(event, (unsigned int)selection.id, selection.priority);
         }
 
-        // No intersections in build!
-        EventScheduler sched;
-        for (const auto& [id, priority, event] : build) {
-            sched.addEvent(event, (unsigned int)id, priority);
+        // add exclusions; use event id's >= 0xF000000
+        unsigned int exclusion_id = 0xF0000000;
+        for (const auto& exclusion: excl) {
+            sched.addEvent(Event({exclusion}), exclusion_id, 1000000.0);
+            ++exclusion_id;
         }
 
         // Print out result!
-        auto result = sched.buildOptimalSchedule();
+        auto result = sched.buildApproxSchedule();
 
-        if (build.size() == 0) {
+        // determine which classes could not be scheduled
+        size_t num_scheduled = 0;
+        for (const auto& selection: sel) {
+            bool found = false;
+            for (const auto& [entry_id, _] : result) {
+                if (selection.id == entry_id) {
+                    ++num_scheduled;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                std::cout << "\nUnable to schedule class with \033[0;36mid\033[0m "
+                    << selection.id << " due to unresolvable conflicts" << std::endl;
+            }
+        }
+
+        if (num_scheduled == 0) {
             std::cout << "\nYour schedule is \033[0;36mempty\033[0m."
                 << std::endl << std::endl;
             return;
@@ -285,6 +289,11 @@ class Application
         "                    ╚═════════════════════════════╝\033[0m\n\n";
 
         for (const auto& [entry_id, section_id] : result) {
+            // ignore exclusions
+            if (entry_id >= 0xF0000000) {
+                continue;
+            }
+
             std::cout << "  \033[0;36m'" << cat.at(entry_id).name << "'\033[0m"
                 << std::endl;
 

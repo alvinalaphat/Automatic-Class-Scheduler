@@ -21,7 +21,7 @@ CXXFLAGS := -m64 -std=c++2a -Weffc++ $(CFLAGS)
 all: jsonTest CatalogueTest IntervalTest TopElemsHeapTest EventSchedulerTest SearchEngineTest Application
 
 # general include dependencies
-DEPS := $(INC)/Interval.h $(INC)/Event.h $(INC)/EventScheduler.h $(INC)/TopElemsHeap.h $(INC)/json.h $(INC)/Catalogue.h $(INC)/SharedVector.h
+DEPS := $(INC)/Interval.h $(INC)/Event.h $(INC)/EventScheduler.h $(INC)/TopElemsHeap.h $(INC)/json.h $(INC)/Catalogue.h $(INC)/SharedVector.h $(INC)/Application.h
 
 # make JSONTest
 jsonTestObjs := $(OBJ)/jsonTest.o
