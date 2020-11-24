@@ -13,3 +13,9 @@ make clean
 make initialize
 
 make Application
+
+
+## If you are on a Notre Dame student machine:
+
+PATH="/escnfs/home/jabbott4/public/gcc/bin:$PATH"
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/escnfs/home/jabbott4/public/gcc/lib64
