@@ -1,4 +1,4 @@
-# Microsoft-Preternship-Project
+# Automatic Class Scheduler
 
 Implementing high level data structures to build an automatic class schedule optimizer
 
